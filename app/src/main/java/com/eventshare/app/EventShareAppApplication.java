@@ -1,13 +1,13 @@
-package com.taskmanagement.app;
+package com.eventshare.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TaskManagementAppApplication {
+public class EventShareAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TaskManagementAppApplication.class, args);
+		SpringApplication.run(EventShareAppApplication.class, args);
 	}
 
 }
