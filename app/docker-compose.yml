@@ -1,0 +1,30 @@
+services:
+  # PostgreSQLデータベース
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: recruit
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # Spring Bootアプリケーション
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/recruit
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password
+
+# データ永続化のためのボリューム
+volumes:
+  postgres-data:
