@@ -24,6 +24,9 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/recruit
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=password
+    volumes:
+      - ./src:/app/src
+      - ./build/libs:/app/build/libs
 
 # データ永続化のためのボリューム
 volumes:
