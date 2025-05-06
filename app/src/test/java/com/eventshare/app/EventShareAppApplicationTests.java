@@ -1,10 +1,10 @@
-package com.taskmanagement.app;
+package com.eventshare.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TaskManagementAppApplicationTests {
+class EventShareAppApplicationTests {
 
 	@Test
 	void contextLoads() {
