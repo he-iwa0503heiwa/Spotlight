@@ -37,6 +37,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// H2データベースを簡易テスト用に追加
+	testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

@@ -38,7 +38,7 @@ public class Event {
     private EventCategory category;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "creator_id", nullable = false)
     private User creator;
 
     private Integer capacity;
@@ -48,7 +48,7 @@ public class Event {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // リレーションシップの定義

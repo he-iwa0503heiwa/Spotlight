@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,6 +48,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<EventParticipation> participations = new ArrayList<>();
 
+    //ひとまず使わないからコメントアウト（あとで機能追加する）
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 //    private List<Photo> photos = new ArrayList<>();
 //
