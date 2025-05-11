@@ -13,11 +13,13 @@ public class EventCategoryServiceImpl implements EventCategoryService {
     //リポジトリの依存性の注入
     private final EventCategoryRepository eventCategoryRepository;
 
+    //コンストラクタインジェクション
     @Autowired
     public EventCategoryServiceImpl(EventCategoryRepository eventCategoryRepository) {
         this.eventCategoryRepository = eventCategoryRepository;
     }
 
+    //以下メソッド実装
     @Override
     public List<EventCategory> getAllCategories() {
         return eventCategoryRepository.findAll();
@@ -48,7 +50,7 @@ public class EventCategoryServiceImpl implements EventCategoryService {
         //更新対象を取得
         EventCategory existingCategory = getCategoryById(id);
 
-        //「変更がある」かつ「すでに存在している」場合エラー
+        //「変更がある」かつ「すでに存在している」場合は例外をスロー
         if (!existingCategory.getName().equals(category.getName()) &&
                 eventCategoryRepository.existsByName(category.getName())) {
             throw new RuntimeException("そのカテゴリ名はすでに存在します：　" + category.getName());
