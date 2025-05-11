@@ -1,6 +1,6 @@
 package com.eventshare.app.service;
 
-import com.event.app.entity.EventCategory;
+import com.eventshare.app.entity.EventCategory;
 
 import java.util.List;
 
