@@ -23,6 +23,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     //タイトルに特定のキーワードを含むイベント検索
     List<Event> findByTitleContaining(String keyword);
 
-    //カテゴリと日付による複合検索
+    //カテゴリと日付による検索
     List<Event> findByCategoryAndEventDateAfter(EventCategory category, LocalDateTime date);
 }

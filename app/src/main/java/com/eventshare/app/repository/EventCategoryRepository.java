@@ -16,7 +16,7 @@ public interface EventCategoryRepository extends JpaRepository<EventCategory, Lo
     boolean existsByName(String name);
 
     //名前で並べ替えてすべてのカテゴリを取得
-    List<EventCategory> findAllByOrderBynameAsc();
+    List<EventCategory> findAllByOrderByNameAsc();
 
     //キーワードを含むカテゴリを検索
     List<EventCategory> findByNameContaining(String keyword);
