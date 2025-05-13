@@ -34,7 +34,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
 
     @Override
     public EventParticipation participateEvent(Event event, User user) {
-        if (eventParticipationRepository.existsByEventAndUser(Event event, User user)) {
+        if (eventParticipationRepository.existsByEventAndUser(event, user)) {
             throw new RuntimeException("このイベントにはすでに参加しています");
         }
         //定員確認（定員が設定されている場合）
@@ -49,13 +49,13 @@ public class EventParticipationServiceImpl implements EventParticipationService 
                 participation.setUser(user);
                 return eventParticipationRepository.save(participation);
             }
-            //通常登録：イベント情報とユーザー情報とステータスをセット
-            EventParticipation participation = new EventParticipation();
-            participation.setEvent(event);
-            participation.setStatus(EventParticipation.ParticipationStatus.CONFIRMED);
-            participation.setUser(user);
-            return eventParticipationRepository.save(participation);
         }
+        //通常登録：イベント情報とユーザー情報とステータスをセット
+        EventParticipation participation = new EventParticipation();
+        participation.setEvent(event);
+        participation.setStatus(EventParticipation.ParticipationStatus.CONFIRMED);
+        participation.setUser(user);
+        return eventParticipationRepository.save(participation);
     }
 
     @Override
@@ -70,20 +70,20 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     @Override
     public EventParticipation updateParticipationStatus(Long participationId, EventParticipation.ParticipationStatus status) {
         EventParticipation participation = eventParticipationRepository.findById(participationId)
-                .orElseThow(() -> new RuntimeException("参加情報が見つかりません。ID：　" + participationId));
+                .orElseThrow(() -> new RuntimeException("参加情報が見つかりません。ID：　" + participationId));
         //ステータスを変更する
         participation.setStatus(status);
         return eventParticipationRepository.save(participation);
     }
 
     @Override
-    public boolean isUserParticipatingInEvent(Event event, User user){
-        return eventParticipationRepository.existsByEventAndUser(Event event, User user);
+    public boolean isUserParticipatingInEvent(Event event, User user) {
+        return eventParticipationRepository.existsByEventAndUser(event, user);
     }
 
     @Override
-    public int getParticipantCountForEvent(Event event){
-        List<EventParticipation> comfirmdParticipations = eventParticipationRepository.findByEventAndStatus(Event event, EventParticipation.ParticipationStatus status);
-        return comfirmdParticipations.size();
+    public int getParticipantCountForEvent(Event event) {
+        List<EventParticipation> comfirmedParticipations = eventParticipationRepository.findByEventAndStatus(event, EventParticipation.ParticipationStatus.CONFIRMED);
+        return comfirmedParticipations.size();
     }
 }
