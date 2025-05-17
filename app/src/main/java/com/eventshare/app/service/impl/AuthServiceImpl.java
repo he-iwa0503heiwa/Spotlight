@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         //上記で認証した処理をセキュリティコンテキストに設定（一時的に保存するメモリスペース）
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        //認証情報をもとにJWTトークンを生成
+        //認証情報をもとにJWTトークンを生成（次回以降のリクエストで身分証明として使用←httpリクエストのステートレスを実現）
         return jwtTokenProvider.generateToken(authentication);
     }
 
