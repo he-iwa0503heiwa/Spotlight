@@ -14,4 +14,50 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+    //リポジトリの依存性の注入
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;//パスワードのハッシュ化と検証（spring security）
+    private final AuthenticationManager authenticationManager;//認証処理（spring security）
+    private final JwtTokenProvider jwtTokenProvider;//JWT(Json Web Token)の生成と検証
+
+    //コンストラクタインジェクション
+    @Autowired
+    public AuthServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager,
+                           JwtTokenProvider jwtTokenProvider) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    @Override
+    public User registerUser(User user) {
+        if (userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("このユーザー名はすでに存在します：　" + user.getUsername())
+        }
+        //spring securityを使用したパスワードのハッシュ化
+        user.setPassword(passwordEncoder.encode(user.getPassword));
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    //ここの認証メソッドむずい。あんまよくわからん
+    public String authenticateUser(String username, String password){
+        //Spring Securityの認証処理
+        Authentication authentication = AuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+        //上記で認証した処理をセキュリティコンテキストに設定
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //認証情報をもとにJWTトークンを生成
+        return jwtTokenProvider.generateToken(authentication);
+    }
+
+    @Override
+    public boolean validateToken(String token){
+        return jwtTokenProvider.validateToken(token);
+    }
 }

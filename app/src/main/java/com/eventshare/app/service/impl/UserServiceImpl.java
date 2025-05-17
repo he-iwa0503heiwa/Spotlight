@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("そのユーザー名はすでに存在します：　" + user.getUsername());
+            throw new RuntimeException("このユーザー名はすでに存在します：　" + user.getUsername());
         }
         //ここでパスワードのハッシュ化などの処理を行う（後で追加）
         return userRepository.save(user);
