@@ -35,7 +35,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public User registerUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new RuntimeException("このユーザー名はすでに存在します：　" + user.getUsername())
+            throw new RuntimeException("このユーザー名はすでに存在します：　" + user.getUsername());
         }
         //spring securityを使用したパスワードのハッシュ化
         user.setPassword(passwordEncoder.encode(user.getPassword));
@@ -44,12 +44,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    //ここの認証メソッドむずい。あんまよくわからん
-    public String authenticateUser(String username, String password){
+    //ユーザーの身元を確認しアクセス許可証（トークン）を発行する
+    public String authenticateUser(String username, String password) {
         //Spring Securityの認証処理
         Authentication authentication = AuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-        //上記で認証した処理をセキュリティコンテキストに設定
+        //上記で認証した処理をセキュリティコンテキストに設定（一時的に保存するメモリスペース）
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         //認証情報をもとにJWTトークンを生成
@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean validateToken(String token){
+    public boolean validateToken(String token) {
         return jwtTokenProvider.validateToken(token);
     }
 }
