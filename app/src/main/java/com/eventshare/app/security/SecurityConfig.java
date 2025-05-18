@@ -49,7 +49,7 @@ public class SecurityConfig {
         return authenticationManager.getAuthenticationManager();
     }
 
-    //セキュリティフィルターチェーンの設定
+    //セキュリティフィルターチェーンの設定（HttpSecurity：「どのURLに誰がアクセスできるか」「認証はどうするか」などを設定するオブジェクト）
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -65,6 +65,7 @@ public class SecurityConfig {
         //JWTをpring Securityのフィルターの前にする（リクエストが来たときに、ログインチェックの前にトークンの検証を先に実行）
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
+        //↑の設定をもとにSecurityFilterChainを作成→適用
         return http.build();
     }
 }
