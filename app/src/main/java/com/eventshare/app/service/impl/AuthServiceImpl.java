@@ -38,7 +38,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("このユーザー名はすでに存在します：　" + user.getUsername());
         }
         //spring securityを使用したパスワードのハッシュ化
-        user.setPassword(passwordEncoder.encode(user.getPassword));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     //ユーザーの身元を確認しアクセス許可証（トークン）を発行する
     public String authenticateUser(String username, String password) {
         //Spring Securityの認証処理
-        Authentication authentication = AuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
         //上記で認証した処理をセキュリティコンテキストに設定（一時的に保存するメモリスペース）
         SecurityContextHolder.getContext().setAuthentication(authentication);
