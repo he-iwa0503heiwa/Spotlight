@@ -26,14 +26,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //JwtAuthenticationFilterのログを出力
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
     //JWTトークンの検証に使用
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     //ユーザー情報をデータベースから取得する
     private final UserDetailsService userDetailsService;
 
     //コンストラクタインジェクション
     @Autowired
-    public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, UserDetailsService userDetailsService) {
-        this.tokenProvider = tokenProvider;
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+        this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
     }
 

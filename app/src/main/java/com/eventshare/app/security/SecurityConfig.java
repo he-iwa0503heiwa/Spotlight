@@ -46,7 +46,7 @@ public class SecurityConfig {
     //認証マネージャー
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationManager.getAuthenticationManager();
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     //セキュリティフィルターチェーンの設定（HttpSecurity：「どのURLに誰がアクセスできるか」「認証はどうするか」などを設定するオブジェクト）
