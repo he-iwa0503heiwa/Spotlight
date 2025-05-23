@@ -14,7 +14,7 @@ public class TestSecurityConfig {
 
     @Bean
     @Primary
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
         //セキュリティをテスト用に簡略化（csrfオフ、全リクエスト許可）
         http
                 .csrf(AbstractHttpConfigurer::disable)

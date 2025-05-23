@@ -1,6 +1,7 @@
 package com.eventshare.app.security;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /*
@@ -30,6 +33,13 @@ public class JwtTokenProvider {
     private int jwtExpirationInMs;
 
     /*
+    秘密鍵をSecretKeyオブジェクトに変換するメソッド
+     */
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /*
     認証トークンをもとにjwtトークンを生成するメソッド
      */
     public String generateToken(Authentication authentication) {
@@ -44,7 +54,7 @@ public class JwtTokenProvider {
                 .setSubject(userDetails.getUsername()) //subject(ユーザー名)を設定
                 .setIssuedAt(now) //発行時刻を設定
                 .setExpiration(expireDate) //有効期限を設定
-                .signWith(SignatureAlgorithm.HS512, jwtSecret) //指定したアルゴリズム（HS512）と秘密鍵でトークンに署名
+                .signWith(getSigningKey(), SignatureAlgorithm.HS512) //指定したアルゴリズム（HS512）と秘密鍵でトークンに署名
                 .compact(); //最終的なJWT文字列を生成して返却
     }
 
@@ -53,8 +63,9 @@ public class JwtTokenProvider {
      */
     public String getUsernameFromToken(String token) {
         //トークンを解析してクレームを取得:キーと値のペアで構成される（JSON形式）
-        Claims claims = Jwts.parser() //JWTパーサーオブジェクト(解析)を作成
-                .setSigningKey(jwtSecret) //パーサーに署名検証用の鍵を設定
+        Claims claims = Jwts.parserBuilder() //JWTパーサーオブジェクト(解析)を作成
+                .setSigningKey(getSigningKey()) //パーサーに署名検証用の鍵を設定
+                .build()
                 .parseClaimsJws(token) //JWTトークン文字列を解析し、検証する
                 .getBody(); //解析結果からペイロード部分（Claims）を取得
 
@@ -68,9 +79,12 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             //トークンの署名と中身をパースして検証する（例外が出なければOK）
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
-        } catch (SignatureException ex) { //署名が不正（改ざんされたトークン）
+        } catch (SecurityException ex) { //署名が不正（改ざんされたトークン）
             logger.error("無効なJWT署名");
         } catch (MalformedJwtException ex) { //トークンの形式が不正
             logger.error("不正なJWTトークン");
