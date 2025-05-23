@@ -47,9 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
 
             //トークンが空でなく、かつ期限切れや改ざんがなく正しいか
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
                 //トークン内にあるユーザー名を取り出す
-                String username = tokenProvider.getUsernameFromToken(jwt);
+                String username = jwtTokenProvider.getUsernameFromToken(jwt);
 
                 //上記でとってきたユーザー名をもとにDBなどから詳細情報をロード
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);

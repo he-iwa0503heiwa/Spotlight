@@ -13,6 +13,7 @@ import java.util.Date;
 /*
 JWTトークンの生成と検証を行うクラス
  */
+@Component
 public class JwtTokenProvider {
     /*
     フィールド変数の設定

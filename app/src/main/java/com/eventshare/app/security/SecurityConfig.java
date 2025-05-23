@@ -22,10 +22,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     //不正アクセスがあったときの処理をハンドリングするクラス：未認証の際は401を返す
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    //JWTトークンプロバイダー
+    private final JwtTokenProvider jwtTokenProvider;
+    //ユーザー詳細サービス
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler) {
+    public SecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                          JwtTokenProvider jwtTokenProvider,
+                          CustomUserDetailsService customUserDetailsService) {
         this.unauthorizedHandler = unauthorizedHandler;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     /*
@@ -34,7 +42,7 @@ public class SecurityConfig {
     //jwtトークンを検証するフィルター
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
+        return new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService);
     }
 
     //パスワードエンコーダー
