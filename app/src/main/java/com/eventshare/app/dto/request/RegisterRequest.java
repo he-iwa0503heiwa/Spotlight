@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/*
+ ユーザー登録リクエストのためのDTOクラス
+ フロントエンドから送信されるユーザー登録データを受け取るためのクラス
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
