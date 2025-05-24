@@ -14,36 +14,41 @@ import org.springframework.web.bind.annotation.*;
 
 /*
  認証関連のAPIエンドポイントを提供するコントローラー
+ 1.ユーザー登録
+ 2.ログイン
+ 3.トークン検証
  */
-@RestController
-@RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@RestController //RestAPIコントローラー
+@RequestMapping("/api/auth") //全共通のベースのURL
+@CrossOrigin(origins = "*") //CORS設定（フロントエンドから全アクセス許可）
 public class AuthController {
 
     private final AuthService authService;
 
+    //コンストラクタインジェクションでauthServiceを自動で設定
     @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
     /*
-     ユーザー登録API
+     1.ユーザー登録API
      POST /api/auth/register
      */
     @PostMapping("/register")
+    //@Valid：バリデーション、@RequestBody：JSONオブジェクト作成
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            // リクエストからUserエンティティを作成
+            // リクエストDTOからUserエンティティを作成
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setPassword(registerRequest.getPassword());
             user.setBio(registerRequest.getBio());
 
-            // ユーザー登録
+            // ユーザー登録（サービスクラスに移す）
             User registeredUser = authService.registerUser(user);
 
-            // レスポンス用DTOに変換
+            // エンティティからレスポンス用DTOに変換
             UserResponse userResponse = new UserResponse(
                     registeredUser.getId(),
                     registeredUser.getUsername(),
@@ -53,43 +58,48 @@ public class AuthController {
                     registeredUser.getUpdatedAt()
             );
 
+            //成功レスポンスを返す（HTTPステータス201 = Created）
             return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
 
         } catch (RuntimeException e) {
+            //エラーが発生した場合
             return ResponseEntity.badRequest().body("ユーザー登録に失敗しました: " + e.getMessage());
         }
     }
 
     /*
-     ログインAPI
+     2.ログインAPI
      POST /api/auth/login
      */
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            // 認証処理とJWTトークン生成
+            //認証処理とJWTトークン生成
             String jwt = authService.authenticateUser(loginRequest.getUsername(), loginRequest.getPassword());
 
-            // 認証成功時、ユーザー情報も返す（ユーザーサービスから取得する必要があるが、簡易的に実装）
-            // TODO: ユーザー情報を取得するサービスメソッドを呼び出し
+            //認証成功時、ユーザー情報も返す
+            User user = ((AuthServiceImpl) authService).getUserByUsername(loginRequest.getUsername());
 
-            // レスポンス作成（仮でユーザーIDは1、後で修正）
-            JwtResponse jwtResponse = new JwtResponse(jwt, 1L, loginRequest.getUsername());
+            //レスポンス作成
+            JwtResponse jwtResponse = new JwtResponse(jwt, user.getId(), user.getUsername());
 
+            //成功レスポンスを返す（HTTPステータス200 = OK）
             return ResponseEntity.ok(jwtResponse);
 
         } catch (RuntimeException e) {
+            //認証失敗の場合
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("ログインに失敗しました: " + e.getMessage());
         }
     }
 
     /*
-     トークン検証API
+     3.トークン検証API
      POST /api/auth/validate
      */
     @PostMapping("/validate")
     public ResponseEntity<?> validateToken(@RequestParam String token) {
         try {
+            //トークンの有効性をチェック
             boolean isValid = authService.validateToken(token);
 
             if (isValid) {
@@ -99,6 +109,7 @@ public class AuthController {
             }
 
         } catch (Exception e) {
+            //予期しないエラーの場合
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("トークン検証中にエラーが発生しました");
         }
     }
