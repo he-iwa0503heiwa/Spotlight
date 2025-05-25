@@ -47,7 +47,9 @@ public class AuthServiceImpl implements AuthService {
     //ユーザーの身元を確認しアクセス許可証（トークン）を発行する
     public String authenticateUser(String username, String password) {
         //Spring Securityの認証処理
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
 
         //上記で認証した処理をセキュリティコンテキストに設定（一時的に保存するメモリスペース）
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -61,7 +63,9 @@ public class AuthServiceImpl implements AuthService {
         return jwtTokenProvider.validateToken(token);
     }
 
-    @Override
+    /*
+     ユーザー名からユーザー情報を取得（ログイン時のレスポンス用）
+     */
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + username));
