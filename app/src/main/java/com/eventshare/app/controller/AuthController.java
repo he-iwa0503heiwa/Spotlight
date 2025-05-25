@@ -36,7 +36,7 @@ public class AuthController {
      POST /api/auth/register
      */
     @PostMapping("/register")
-    //@Valid：バリデーション、@RequestBody：JSONオブジェクト作成
+    //@Valid：バリデーション、@RequestBody：HTTPのJSONボディをオブジェクトに変換
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
             // リクエストDTOからUserエンティティを作成
@@ -77,8 +77,8 @@ public class AuthController {
             //認証処理とJWTトークン生成
             String jwt = authService.authenticateUser(loginRequest.getUsername(), loginRequest.getPassword());
 
-            //認証成功時、ユーザー情報も返す
-            User user = ((AuthServiceImpl) authService).getUserByUsername(loginRequest.getUsername());
+            //認証成功時、ユーザー情報を返す
+            User user = authService.getUserByUsername(loginRequest.getUsername());
 
             //レスポンス作成
             JwtResponse jwtResponse = new JwtResponse(jwt, user.getId(), user.getUsername());

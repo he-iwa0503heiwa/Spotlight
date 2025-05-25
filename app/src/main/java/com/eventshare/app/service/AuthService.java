@@ -9,6 +9,9 @@ public interface AuthService {
     //ログイン認証
     String authenticateUser(String username, String password);
 
-    //認証するトークンの有効性を検証する
+    //認証するトークンの有効性を検証
     boolean validateToken(String token);
+
+    //ユーザー名からユーザーを取得
+    User getUserByUsername(String username);
 }

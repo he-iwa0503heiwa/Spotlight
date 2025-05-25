@@ -60,4 +60,10 @@ public class AuthServiceImpl implements AuthService {
     public boolean validateToken(String token) {
         return jwtTokenProvider.validateToken(token);
     }
+
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません: " + username));
+    }
 }
