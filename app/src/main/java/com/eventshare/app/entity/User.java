@@ -38,7 +38,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     //リレーションシップの定義
