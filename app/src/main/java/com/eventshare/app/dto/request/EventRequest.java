@@ -22,7 +22,7 @@ public class EventRequest {
     @Size(max = 50, message = "タイトルは50文字以内で入力してください")
     private String title;
 
-    @Size(max = 1000, message = "説明は1000文字以内で入力してください"))
+    @Size(max = 1000, message = "説明は1000文字以内で入力してください")
     private String description;
 
     @NotNull(message = "イベント開催日時は必須です")
