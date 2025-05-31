@@ -3,6 +3,7 @@ package com.eventshare.app.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -67,6 +68,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth //↓アクセス制御
                         .requestMatchers("/api/auth/**").permitAll() //api/auth/**は誰でもアクセス可
                         .requestMatchers("/api/public/**").permitAll() //api/public/**は誰でもアクセス可
+                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() //イベント一覧は誰でも閲覧可
+                        .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll() //イベント詳細は誰でも閲覧可
                         .anyRequest().authenticated() //それ以外はアクセス不可
                 );
 

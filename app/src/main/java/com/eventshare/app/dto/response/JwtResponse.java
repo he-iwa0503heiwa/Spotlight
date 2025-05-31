@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 ログイン成功時のレスポンスのためのDTOクラス
 フロントエンドにjwtトークンとユーザー情報を返すためのクラス
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class JwtResponse {
     private String token;    //JWTトークン
     private String type = "Bearer";    //トークンの種類（固定値）

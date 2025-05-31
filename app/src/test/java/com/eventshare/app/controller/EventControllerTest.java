@@ -71,18 +71,18 @@ public class EventControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         //ユーザーデータ
-        testUser = new User;
+        testUser = new User();
         testUser.setId(1L);
-        testUser.setName("testuser");
+        testUser.setUsername("testuser");
 
         //カテゴリデータ
-        testCategory = new EventCategory;
+        testCategory = new EventCategory();
         testCategory.setId(1L);
         testCategory.setName("野球");
         testCategory.setDescription("野球イベント");
 
         //イベントデータ
-        testEvent = new Event;
+        testEvent = new Event();
         testEvent.setId(1L);
         testEvent.setTitle("阪神vs巨人");
         testEvent.setDescription("プロ野球観戦");
@@ -104,19 +104,19 @@ public class EventControllerTest {
     5. 参加者数が正しく計算されているか
      */
     @Test
-    void testGetAllEvents() throws Excetion {
+    void testGetAllEvents() throws Exception {
         //モックの動作設定
-        List<Event> events = Arrays.asList(testEvent);　//配列をリストに
+        List<Event> events = Arrays.asList(testEvent); //配列をリストに
         when(eventService.getAllEvents()).thenReturn(events);//getAllEvents()でeventsを返す
         when(eventParticipationService.getParticipantCountForEvent(any(Event.class))).thenReturn(5);//getParticipantCountForEventが呼ばれたら5を返す
 
         //仮のwebサーバー作ってapiを呼び出し、レスポンスをチェック
         mockMvc.perform(get("/api/Events"))
-                .andExcept(status().isOk())
-                .andExcept(jsonpath("$").isArray())
-                .andExcept(jsonpath("$[0].id").value(1))
-                .andExcept(jsonpath("$[0].title").value("阪神vs巨人"))
-                .andExcept(jsonpath("$[0].participantCount").value(5);
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].title").value("阪神vs巨人"))
+                .andExpect(jsonPath("$[0].participantCount").value(5));
     }
 
     /*
@@ -128,7 +128,8 @@ public class EventControllerTest {
     5. HTTP 201 Created が返るか
      */
     @Test
-    @WithMockUser(username = "testuser")//認証済みユーザーとしてテスト
+    @WithMockUser(username = "testuser")
+//認証済みユーザーとしてテスト
     void testCreateEvent() throws Exception {
         //リクエストデータの作成
         EventRequest eventRequest = new EventRequest();

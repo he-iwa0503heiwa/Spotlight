@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_DB: recruit
+      POSTGRES_DB: eventshare
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
     ports:
@@ -21,7 +21,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/recruit
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eventshare
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=password
     volumes:
