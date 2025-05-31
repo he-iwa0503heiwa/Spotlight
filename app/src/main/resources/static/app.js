@@ -24,7 +24,14 @@ async function userRegister(evt) {
             body: JSON.stringify({username, password, bio})
         });
         if (response.ok){
-            const result = await response.json();
+            const result = await response.json();//サーバーから返ってきたjsonデータを取得
+            showStatus(`登録成功： ${result.username}さん、ようこそ`);
+            document.getElementById('register-form').reset();
+        }else{
+            const error = await response.text();//エラー時はテキストで変換される
+            showStatus(`エラー：${error}` true);//ステータスをエラーにして返す
         }
+    }catch (error){//通信エラー
+        showStatus(`エラー：${error.message}` true);
     }
 }
