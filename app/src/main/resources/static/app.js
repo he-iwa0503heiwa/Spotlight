@@ -137,6 +137,11 @@ async function createEvent(ent){
     }
 }
 
+//ログイン状態に応じてUIを切り替える関数
+function updateUI(){
+
+}
+
 //画面切り替え用の関数
 function showMainSection() {
     document.getElementById('auth-section').classList.add('hidden');//ログイン画面を隠す
