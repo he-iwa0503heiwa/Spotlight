@@ -59,7 +59,7 @@ async function userLogin(evt){
             currentToken = result.token;//サーバーからのjwtトークン
             currentUser = result;
 
-            showMainSection();//画面切り替え
+            showMainSection();//メイン画面に切り替え
             showStatus(`ログイン成功： こんにちは、${result.username}さん`);
             loadEvents();//イベント一覧読み込み
         }else{
@@ -137,13 +137,26 @@ async function createEvent(ent){
     }
 }
 
-//ログイン状態に応じてUIを切り替える関数
-function updateUI(){
-
-}
-
-//画面切り替え用の関数
+/*
+ログイン状態に応じてUIを切り替える関数
+*/
+//メイン画面へ切り替え
 function showMainSection() {
     document.getElementById('auth-section').classList.add('hidden');//ログイン画面を隠す
     document.getElementById('eventRegi-section').classList.remove('hidden');//メイン画面を表示
+}
+//認証画面(ログイン)へ切り替え
+function showAuthSection(){
+    document.getElementById('auth-section').classList.remove('hidden');//ログイン画面を表示
+    document.getElementById('eventRegi-section').classList.add('hidden');//メイン画面を隠す
+}
+
+//ログアウト
+function logout(){
+    currentToken = null;
+    currentToken = null;
+
+    showAuthSection();
+    document.getElementById('login-form').reset();
+    showStatus('ログアウトしました');
 }
