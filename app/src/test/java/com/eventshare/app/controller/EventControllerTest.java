@@ -111,7 +111,7 @@ public class EventControllerTest {
         when(eventParticipationService.getParticipantCountForEvent(any(Event.class))).thenReturn(5);//getParticipantCountForEventが呼ばれたら5を返す
 
         //仮のwebサーバー作ってapiを呼び出し、レスポンスをチェック
-        mockMvc.perform(get("/api/Events"))
+        mockMvc.perform(get("/api/events"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(1))

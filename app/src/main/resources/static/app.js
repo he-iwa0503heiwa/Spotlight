@@ -23,7 +23,7 @@ async function userRegister(evt) {
         //fetchでサーバー側と通信する
         const response = await fetch('/api/auth/register', {
             method: 'POST',
-            header: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username, password, bio})//オブジェクトをJSONに変換
         });
         if (response.ok){
@@ -50,7 +50,7 @@ async function userLogin(evt){
         //fetchでサーバー側と通信する
         const response = await fetch('/api/auth/login', {
             method: 'POST',
-            header: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username, password})
         });
 
@@ -76,32 +76,32 @@ async function loadEvents(){
     try{
         const response = await fetch('/api/events');
         const events = await response.json();
-        const eventsList = document.getElementById('events-list"');//htmlからイベントリスト取得
+        const eventsList = document.getElementById('events-list');//htmlからイベントリスト取得
 
         //イベントがなかった場合
         if (events.length === 0) {
             eventsList.innerHTML = '<p>現在イベントはありません</p>';
             return;
         }
-        eventsList.innerHTML = events.map(event => createEventCard(event)).json('');//イベントカードを設定し文字列へ
+        eventsList.innerHTML = events.map(event => createEventCard(event)).join('');//イベントカードを設定し文字列へ
     }catch(error){
         showStatus(`イベント一覧読み込み失敗：${error.message}` true);
     }
 }
 
 //イベントカードをhtmlで作成して返す
-function createEventCard(){
+function createEventCard(evt){
     return `
     <div class="event-card">
-    <h3>${event.title}</h3>
-    <p>${event.description}</p>
-    <p>日時: ${new Date(event.eventDate).toLocaleString()}</p>//サーバー→Dateオブジェクト変換→日本語表示変換
-    <p>作成者: ${event.createdBy}</p>
+    <h3>${evt.title}</h3>
+    <p>${evt.description}</p>
+    <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>//サーバー→Dateオブジェクト変換→日本語表示変換
+    <p>作成者: ${evt.createdBy}</p>
     </div>`;
 }
 
 //イベント作成処理
-async function createEvent(ent){
+async function createEvent(evt){
     evt.preventDefault();//ページリロードを防ぐ
     const title = document.getElementById('event-title').value;
     const description = document.getElementById('event-description').value;
@@ -121,7 +121,7 @@ async function createEvent(ent){
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`//認証ヘッダー
             },
-            body: {title: title, description: description, eventDate, eventDate}
+            body: JSON.stringify({title: title, description: description, eventDate, eventDate})
         });
 
         if (response.ok){
@@ -154,7 +154,7 @@ function showAuthSection(){
 //ログアウト
 function logout(){
     currentToken = null;
-    currentToken = null;
+    currentUser = null;
 
     showAuthSection();
     document.getElementById('login-form').reset();
