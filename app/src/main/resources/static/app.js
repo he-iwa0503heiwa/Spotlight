@@ -5,7 +5,7 @@ let currentUser = null;
 //ステータスを表示する関数
 function showStatus(message, isError = false) {
     const statusDiv = document.getElementById('status-message');
-    statusDiv.innerHTML = `<div class="${isError ? 'error' : 'success'} status">%{message}</div>`;//ステータス置き換え
+    statusDiv.innerHTML = `<div class="${isError ? 'error' : 'success'} status">${message}</div>`;//ステータス置き換え
     setTimeout(() => {
         statusDiv.innerHTML = '';
     }, 3000)//3秒後にinnerHTMLを空に
@@ -32,10 +32,10 @@ async function userRegister(evt) {
             document.getElementById('register-form').reset();
         }else{
             const error = await response.text();//エラー時はテキストで変換される
-            showStatus(`エラー：${error}` true);//ステータスをエラーにして返す
+            showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
         }
     }catch (error){//通信エラー
-        showStatus(`エラー：${error.message}` true);
+        showStatus(`エラー：${error.message}`, true);
     }
 }
 
@@ -117,11 +117,11 @@ async function createEvent(evt){
         //新しいイベント作成
         const response = await fetch('/api/events', {
             method: 'POST',
-            header: {
+            headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`//認証ヘッダー
             },
-            body: JSON.stringify({title: title, description: description, eventDate, eventDate})
+            body: JSON.stringify({title: title, description: description, eventDate, date})
         });
 
         if (response.ok){
