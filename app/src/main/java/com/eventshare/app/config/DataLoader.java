@@ -29,9 +29,8 @@ public class DataLoader implements CommandLineRunner {
     初期のイベントカテゴリデータを投入するメソッド
      */
     private void loadInitialCategories() {
-        //カテゴリが存在しない場合以下のデモデータを入れていく。
         if (eventCategoryService.getAllCategories().isEmpty()) {
-            //野球カテゴリ
+            // 野球カテゴリ
             if (!eventCategoryService.existsByName("野球")) {
                 EventCategory baseball = new EventCategory();
                 baseball.setName("野球");
@@ -60,8 +59,10 @@ public class DataLoader implements CommandLineRunner {
                 eventCategoryService.createCategory(others);
                 System.out.println("初期カテゴリを作成しました: その他");
             }
+            System.out.println("初期カテゴリの作成が完了しました");
+        } else {
+            System.out.println("初期カテゴリは既に存在します。初期データ投入をスキップします");
         }
-        System.out.println("初期カテゴリは存在します。初期データ投入はスキップします");
     }
 }
 
