@@ -62,6 +62,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()//フロントと接続のためのcors
                 .csrf(csrf -> csrf.disable()) //CSRFを無効にする
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) //例外処理（未認証のときの対応）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //セッションの管理方法を「ステートレス」に
@@ -78,5 +79,17 @@ public class SecurityConfig {
 
         //↑の設定をもとにSecurityFilterChainを作成→適用
         return http.build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));//ドメインアクセス許可
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));//メソッドアクセス許可
+        configuration.setAllowedHeaders(Arrays.asList("*"));//ヘッダーアクセス許可
+        configuration.setAllowCredentials(true);//認証トークン許可
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);//「/api/**のすべてのパスに適用」
+        return source;
     }
 }
