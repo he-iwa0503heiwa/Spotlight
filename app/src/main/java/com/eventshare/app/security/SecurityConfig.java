@@ -13,6 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 /**
  * Spring Securityの「設定だけ」をまとめたクラス
@@ -62,7 +67,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()//フロントと接続のためのcors
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))//フロントと接続のためのcors
                 .csrf(csrf -> csrf.disable()) //CSRFを無効にする
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) //例外処理（未認証のときの対応）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //セッションの管理方法を「ステートレス」に
@@ -80,6 +85,7 @@ public class SecurityConfig {
         //↑の設定をもとにSecurityFilterChainを作成→適用
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
