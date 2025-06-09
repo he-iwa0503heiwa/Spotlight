@@ -72,6 +72,7 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) //例外処理（未認証のときの対応）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //セッションの管理方法を「ステートレス」に
                 .authorizeHttpRequests(auth -> auth //↓アクセス制御
+                        .requestMatchers("/", "/index.html", "/*.js", "/*.css").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() //api/auth/**は誰でもアクセス可
                         .requestMatchers("/api/public/**").permitAll() //api/public/**は誰でもアクセス可
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() //イベント一覧は誰でも閲覧可
