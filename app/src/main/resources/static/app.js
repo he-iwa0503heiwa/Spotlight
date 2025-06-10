@@ -64,10 +64,10 @@ async function userLogin(evt){
             loadEvents();//イベント一覧読み込み
         }else{
             const error = await response.text();//エラー時はテキストで変換される
-            showStatus(`エラー：${error}` true);//ステータスをエラーにして返す
+            showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
         }
     }catch (error){//通信エラー
-        showStatus(`エラー：${error.message}` true);
+        showStatus(`エラー：${error.message}`, true);
     }
 }
 
@@ -85,7 +85,7 @@ async function loadEvents(){
         }
         eventsList.innerHTML = events.map(event => createEventCard(event)).join('');//イベントカードを設定し文字列へ
     }catch(error){
-        showStatus(`イベント一覧読み込み失敗：${error.message}` true);
+        showStatus(`イベント一覧読み込み失敗：${error.message}`, true);
     }
 }
 
