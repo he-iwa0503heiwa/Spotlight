@@ -105,7 +105,10 @@ async function createEvent(evt){
     evt.preventDefault();//ページリロードを防ぐ
     const title = document.getElementById('event-title').value;
     const description = document.getElementById('event-description').value;
-    const date = document.getElementById('event-date').value;
+    const eventDate = document.getElementById('event-date').value;
+    const location = document.getElementById('event-location').value;
+    const categoryId = document.getElementById('event-category').value;
+    const capacity = document.getElementById('event-capacity').value;
 
     //未ログインの場合
     if (!currentToken) {
@@ -121,8 +124,15 @@ async function createEvent(evt){
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`//認証ヘッダー
             },
-            body: JSON.stringify({title: title, description: description, eventDate, date})
-        });
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                eventDate: eventDate,
+                location: location,
+                categoryId: parseInt(categoryId),
+                capacity: capacity ? parseInt(capacity) : null
+            })
+        };
 
         if (response.ok){
             const result = await response.json();
