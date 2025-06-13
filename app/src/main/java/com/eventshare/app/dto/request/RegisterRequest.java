@@ -20,7 +20,7 @@ public class RegisterRequest {
     private String username;
 
     @NotBlank(message = "パスワードは必須です")
-    @Size(min = 8, max = 50, message = "パスワードは6文字以上50文字以下で入力してください")
+    @Size(min = 6, max = 50, message = "パスワードは6文字以上50文字以下で入力してください")
     private String password;
 
     @Size(max = 1000, message = "自己紹介は1000字以内で入力してください")

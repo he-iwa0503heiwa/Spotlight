@@ -91,12 +91,16 @@ async function loadEvents(){
 
 //イベントカードをhtmlで作成して返す
 function createEventCard(evt){
+    const createdBy = evt.creator ? evt.creator.username : '不明';
     return `
     <div class="event-card">
     <h3>${evt.title}</h3>
-    <p>${evt.description}</p>
-    <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>//サーバー→Dateオブジェクト変換→日本語表示変換
-    <p>作成者: ${evt.createdBy}</p>
+    <p>${evt.description || ''}</p>
+    <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>
+    <p>場所: ${evt.location || '未設定'}</p>
+    <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
+    <p>作成者: ${createdBy}</p>
+    <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
     </div>`;
 }
 
@@ -132,15 +136,16 @@ async function createEvent(evt){
                 categoryId: parseInt(categoryId),
                 capacity: capacity ? parseInt(capacity) : null
             })
-        };
+        });
 
         if (response.ok){
             const result = await response.json();
             showStatus('イベントが作成されました');
-            document.getElementById('create-event-form').reset();//フォーム要素取得してフォームクリア
+            document.getElementById('event-form').reset();//フォーム要素取得してフォームクリア
             loadEvents();//新しく作成したイベントをサーバーから最新取得と画面に反映
         }else{
-            showStatus('イベント作成に失敗しました', true);
+            const error = await response.text();
+            showStatus(`イベント作成に失敗しました: ${error}`, true);
         }
     }catch(error){
         showStatus(`エラー：${error.message}`, true);
