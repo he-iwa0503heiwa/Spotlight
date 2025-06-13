@@ -1,5 +1,4 @@
 services:
-  # PostgreSQLデータベース
   postgres:
     image: postgres:16
     environment:
@@ -11,7 +10,6 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-  # Spring Bootアプリケーション
   app:
     build:
       context: .
@@ -24,10 +22,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eventshare
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=password
-    volumes:
-      - ./src:/app/src
-      - ./build/libs:/app/build/libs
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
-# データ永続化のためのボリューム
 volumes:
   postgres-data:

@@ -94,6 +94,7 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));//メソッドアクセス許可
         configuration.setAllowedHeaders(Arrays.asList("*"));//ヘッダーアクセス許可
         configuration.setAllowCredentials(true);//認証トークン許可
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);//「/api/**のすべてのパスに適用」
