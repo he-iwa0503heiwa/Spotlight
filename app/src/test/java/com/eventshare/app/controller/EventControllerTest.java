@@ -1,6 +1,5 @@
 package com.eventshare.app.controller;
 
-import com.eventshare.app.config.TestSecurityConfig;
 import com.eventshare.app.dto.request.EventRequest;
 import com.eventshare.app.entity.Event;
 import com.eventshare.app.entity.EventCategory;
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,9 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  EventControllerのテストクラス
  */
 @WebMvcTest(EventController.class) //コントローラー専用テストのアノテーション
-@Import(TestSecurityConfig.class) //必要な設定クラスを手動で読み込む
 @ActiveProfiles("test") //test用のapplocation.propertiesの設定ファイルを読み込む
 public class EventControllerTest {
+    /*
+    テストデータの準備
+     */
+    private ObjectMapper objectMapper;  //JSON変換用
     //モックツール
     private MockMvc mockMvc;
     //依存するサービスをモックか
@@ -49,16 +50,10 @@ public class EventControllerTest {
     private UserService userService;
     @MockBean
     private EventParticipationService eventParticipationService;
-
-    /*
-    テストデータの準備
-     */
-    private ObjectMapper objectMapper;  //JSON変換用
     private User testUser;              //テスト用ユーザー
     private EventCategory testCategory; //テスト用カテゴリ
     private Event testEvent;           //テスト用イベント
 
-    //コンストラクタインジェクション
     @Autowired
     public EventControllerTest(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
