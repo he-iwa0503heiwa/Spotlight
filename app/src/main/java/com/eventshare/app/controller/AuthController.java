@@ -39,14 +39,18 @@ public class AuthController {
     //@Valid：バリデーション、@RequestBody：HTTPのJSONボディをオブジェクトに変換
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
+            System.out.println("ユーザー登録リクエスト受信: " + registerRequest.getUsername()); //デバッグログ追加取得用
+
             // リクエストDTOからUserエンティティを作成
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setPassword(registerRequest.getPassword());
             user.setBio(registerRequest.getBio());
 
+            System.out.println("ユーザー登録処理開始"); //デバッグログ追加取得用
             // ユーザー登録（サービスクラスに移す）
             User registeredUser = authService.registerUser(user);
+            System.out.println("ユーザー登録成功: " + registeredUser.getId()); //デバッグログ追加取得用
 
             // エンティティからレスポンス用DTOに変換
             UserResponse userResponse = new UserResponse(
@@ -62,6 +66,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
 
         } catch (RuntimeException e) {
+            System.out.println("ユーザー登録エラー: " + e.getMessage()); //デバッグログ追加取得用
+            e.printStackTrace(); // スタックトレース出力
             //エラーが発生した場合
             return ResponseEntity.badRequest().body("ユーザー登録に失敗しました: " + e.getMessage());
         }

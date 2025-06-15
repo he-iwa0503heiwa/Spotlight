@@ -19,22 +19,30 @@ async function userRegister(evt) {
     const password = document.getElementById('password').value;
     const bio = document.getElementById('bio').value;
 
+    console.log('登録処理開始:', { username, password, bio }); //デバッグログ追加取得用
+
     try{
         //fetchでサーバー側と通信する
+        console.log('APIリクエスト送信前'); // デバッグログ追加
         const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username, password, bio})//オブジェクトをJSONに変換
         });
+        console.log('APIレスポンス受信:', response.status); //デバッグログ追加取得用
+
         if (response.ok){
             const result = await response.json();//サーバーから返ってきたjsonデータを取得
+            console.log('登録成功:', result); //デバッグログ追加取得用
             showStatus(`登録成功： ${result.username}さん、ようこそ`);
             document.getElementById('register-form').reset();
         }else{
             const error = await response.text();//エラー時はテキストで変換される
+            console.log('登録エラー:', error); //デバッグログ追加取得用
             showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
         }
     }catch (error){//通信エラー
+        console.log('例外発生:', error); //デバッグログ追加取得用
         showStatus(`エラー：${error.message}`, true);
     }
 }
@@ -141,7 +149,7 @@ async function createEvent(evt){
         if (response.ok){
             const result = await response.json();
             showStatus('イベントが作成されました');
-            document.getElementById('event-form').reset();//フォーム要素取得してフォームクリア
+            document.getElementById('create-event-form').reset();//フォーム要素取得してフォームクリア
             loadEvents();//新しく作成したイベントをサーバーから最新取得と画面に反映
         }else{
             const error = await response.text();
