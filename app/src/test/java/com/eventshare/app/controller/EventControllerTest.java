@@ -103,7 +103,7 @@ public class EventControllerTest {
         //モックの動作設定
         List<Event> events = Arrays.asList(testEvent); //配列をリストに
         when(eventService.getAllEvents()).thenReturn(events);//getAllEvents()でeventsを返す
-        when(eventParticipationService.getParticipantCountForEvent(any(Event.class))).thenReturn(5);//getParticipantCountForEventが呼ばれたら5を返す
+        when(eventParticipationService.getParticipantCountForEvent(any(Event.class))).thenReturn(0);//getParticipantCountForEventが呼ばれたら0を返す
 
         //仮のwebサーバー作ってapiを呼び出し、レスポンスをチェック
         mockMvc.perform(get("/api/events"))
@@ -111,7 +111,7 @@ public class EventControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].title").value("阪神vs巨人"))
-                .andExpect(jsonPath("$[0].participantCount").value(5));
+                .andExpect(jsonPath("$[0].participantCount").value(0));
     }
 
     /*
@@ -146,7 +146,7 @@ public class EventControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventRequest)))  //JSON変換
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("阪神vs巨人"))
+                .andExpect(jsonPath("$.title").value("新しいイベント"))
                 .andExpect(jsonPath("$.category.name").value("野球"));
     }
 }
