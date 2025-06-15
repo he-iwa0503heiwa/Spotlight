@@ -1,6 +1,8 @@
 package com.eventshare.app.controller;
 
+import com.eventshare.app.config.TestSecurityConfig;
 import com.eventshare.app.dto.request.EventRequest;
+import com.eventshare.app.dto.response.EventResponse;
 import com.eventshare.app.entity.Event;
 import com.eventshare.app.entity.EventCategory;
 import com.eventshare.app.entity.User;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -34,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(EventController.class) //コントローラー専用テストのアノテーション
 @ActiveProfiles("test") //test用のapplocation.propertiesの設定ファイルを読み込む
+@Import(TestSecurityConfig.class)
 public class EventControllerTest {
     /*
     テストデータの準備
@@ -85,7 +89,6 @@ public class EventControllerTest {
         testEvent.setLocation("甲子園球場");
         testEvent.setCapacity(50);
         testEvent.setCategory(testCategory);
-        testEvent.setCreator(testUser);
         testEvent.setCreatedAt(LocalDateTime.now());
         testEvent.setUpdatedAt(LocalDateTime.now());
     }
@@ -99,6 +102,7 @@ public class EventControllerTest {
     5. 参加者数が正しく計算されているか
      */
     @Test
+    @WithMockUser(username = "testuser")
     void testGetAllEvents() throws Exception {
         //モックの動作設定
         List<Event> events = Arrays.asList(testEvent); //配列をリストに
@@ -124,8 +128,18 @@ public class EventControllerTest {
      */
     @Test
     @WithMockUser(username = "testuser")
-//認証済みユーザーとしてテスト
     void testCreateEvent() throws Exception {
+        //念のためIDを明示的にセット
+        testUser.setId(1L);
+        testEvent.setId(1L);
+        testEvent.setCreator(testUser);
+        testEvent.setCategory(testCategory);
+        testEvent.setTitle("新しいイベント");
+        testEvent.setDescription("テストイベント");
+        testEvent.setEventDate(LocalDateTime.now().plusDays(10));
+        testEvent.setLocation("テスト会場");
+        testEvent.setCapacity(30);
+
         //リクエストデータの作成
         EventRequest eventRequest = new EventRequest();
         eventRequest.setTitle("新しいイベント");
@@ -135,11 +149,10 @@ public class EventControllerTest {
         eventRequest.setCategoryId(1L);
         eventRequest.setCapacity(30);
 
-        //モックの動作を設定
+        //モックの動作設定
         when(userService.getUserByUsername("testuser")).thenReturn(testUser);
         when(eventCategoryService.getCategoryById(1L)).thenReturn(testCategory);
         when(eventService.createEvent(any(Event.class))).thenReturn(testEvent);
-        when(eventParticipationService.getParticipantCountForEvent(any(Event.class))).thenReturn(0);
 
         //POST apiを呼び出してレスポンスをチェック
         mockMvc.perform(post("/api/events")
