@@ -1,19 +1,16 @@
-package com.eventshare.app.controller;
+package java.com.eventshare.app.controller;
 
 import com.eventshare.app.dto.request.EventRequest;
 import com.eventshare.app.dto.response.EventResponse;
 import com.eventshare.app.entity.Event;
 import com.eventshare.app.entity.EventCategory;
 import com.eventshare.app.entity.User;
-import com.eventshare.app.service.EventService;
 import com.eventshare.app.service.EventCategoryService;
-import com.eventshare.app.service.UserService;
 import com.eventshare.app.service.EventParticipationService;
+import com.eventshare.app.service.EventService;
+import com.eventshare.app.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
