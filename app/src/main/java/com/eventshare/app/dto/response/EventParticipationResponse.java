@@ -1,73 +1,52 @@
 package com.eventshare.app.dto.response;
 
 import com.eventshare.app.entity.EventParticipation;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EventParticipationResponse {
     private Long id;
     private Long eventId;
     private String eventTitle;
     private Long userId;
     private String username;
+    private String status;
     private LocalDateTime participatedAt;
+    //イベント情報
+    private EventInfo event;
+    //ユーザー情報
+    private UserInfo user;
 
-    public EventParticipationResponse() {}
-
-    public EventParticipationResponse(Long id, Long eventId, String eventTitle, Long userId, String username, LocalDateTime participatedAt) {
-        this.id = id;
-        this.eventId = eventId;
-        this.eventTitle = eventTitle;
-        this.userId = userId;
-        this.username = username;
-        this.participatedAt = participatedAt;
+    /*
+    イベント情報の内部クラス
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EventInfo{
+        private Long id;
+        private String title;
+        private String description;
+        private LocalDateTime eventDate;
+        private String location;
+        private Integer capacity;
+        private Integer participantCount;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    /*
+    ユーザー情報の内部クラス
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserInfo{
+        private Long id;
+        private String username;
     }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getEventId() {
-        return eventId;
-    }
-
-    public void setEventId(Long eventId) {
-        this.eventId = eventId;
-    }
-
-    public String getEventTitle() {
-        return eventTitle;
-    }
-
-    public void setEventTitle(String eventTitle) {
-        this.eventTitle = eventTitle;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public LocalDateTime getParticipatedAt() {
-        return participatedAt;
-    }
-
-    public void setParticipatedAt(LocalDateTime participatedAt) {
-        this.participatedAt = participatedAt;
-    }
-} 
+}

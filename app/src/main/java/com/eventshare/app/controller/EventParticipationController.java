@@ -10,10 +10,11 @@ import com.eventshare.app.dto.response.EventParticipationResponse;
 
 /*
  イベント参加関連のAPIエンドポイントを提供するコントローラー
- 1. イベント参加登録
- 2. 参加キャンセル
- 3. 参加状況確認
- 4. イベントの参加者一覧取得
+ 1.イベント参加登録
+ 2.参加キャンセル
+ 3.参加状況確認
+ 4.イベントの参加者一覧取得
+ 5.ユーザーの参加イベント一覧取得
  */
 @RestController
 @RequestMapping("/api/events")
@@ -33,7 +34,7 @@ public class EventParticipationController {
     }
 
     /*
-     1. イベント参加登録API
+     1.イベント参加登録API
      POST /api/events/{id}/participate
     */
     @PostMapping("/{id}/participate")
