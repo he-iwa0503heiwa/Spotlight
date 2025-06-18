@@ -1,4 +1,4 @@
-package java.com.eventshare.app.controller;
+package com.eventshare.app.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.com.eventshare.app.dto.response.EventParticipationResponse;
+import com.eventshare.app.dto.response.EventParticipationResponse;
 
 /*
  イベント参加関連のAPIエンドポイントを提供するコントローラー
@@ -37,7 +37,7 @@ public class EventParticipationController {
      POST /api/events/{id}/participate
     */
     @PostMapping("/{id}/participate")
-    public ResponceEntity<?> participateEvent(@PathVariable Long id) {
+    public ResponseEntity<?> participateEvent(@PathVariable Long id) {
         try {
             //現在ログインしているユーザーを取得
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -65,5 +65,19 @@ public class EventParticipationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("イベント参加登録中にエラーが発生しました: " + e.getMessage());
         }
+    }
+
+    /*
+     EventParticipationエンティティをEventParticipationResponseに変換するヘルパーメソッド
+     */
+    private EventParticipationResponse convertToParticipationResponse(com.eventshare.app.entity.EventParticipation participation) {
+        EventParticipationResponse response = new EventParticipationResponse();
+        response.setId(participation.getId());
+        response.setEventId(participation.getEvent().getId());
+        response.setEventTitle(participation.getEvent().getTitle());
+        response.setUserId(participation.getUser().getId());
+        response.setUsername(participation.getUser().getUsername());
+        response.setParticipatedAt(participation.getCreatedAt());
+        return response;
     }
 }

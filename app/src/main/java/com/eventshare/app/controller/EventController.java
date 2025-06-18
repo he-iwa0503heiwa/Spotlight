@@ -1,4 +1,4 @@
-package java.com.eventshare.app.controller;
+package com.eventshare.app.controller;
 
 import com.eventshare.app.dto.request.EventRequest;
 import com.eventshare.app.dto.response.EventResponse;
