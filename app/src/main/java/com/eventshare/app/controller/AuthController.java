@@ -67,7 +67,7 @@ public class AuthController {
 
         } catch (RuntimeException e) {
             System.out.println("ユーザー登録エラー: " + e.getMessage()); //デバッグログ追加取得用
-            e.printStackTrace(); // スタックトレース出力
+            e.printStackTrace(); //スタックトレース出力
             //エラーが発生した場合
             return ResponseEntity.badRequest().body("ユーザー登録に失敗しました: " + e.getMessage());
         }
@@ -89,7 +89,7 @@ public class AuthController {
             //レスポンス作成
             JwtResponse jwtResponse = new JwtResponse(jwt, user.getId(), user.getUsername());
 
-            //成功レスポンスを返す（HTTPステータス200 = OK）
+            //成功レスポンスを返す（HTTPステータス200）
             return ResponseEntity.ok(jwtResponse);
 
         } catch (RuntimeException e) {
