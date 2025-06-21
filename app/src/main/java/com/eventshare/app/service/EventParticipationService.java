@@ -27,4 +27,7 @@ public interface EventParticipationService {
 
     //特定イベントの参加人数を取得
     int getParticipantCountForEvent(Event event);
+
+    //ユーザー名と特定イベントから参加者を取得
+    List<EventParticipation> getParticipationByEventAndUser(Event event, User user);
 }

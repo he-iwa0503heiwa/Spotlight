@@ -95,16 +95,17 @@ public class EventParticipationController {
                 return ResponseEntity.badRequest().body("このイベントには参加してません");
             }
 
-            // 参加記録を取得して削除
+            //参加記録を取得して削除
             List<EventParticipation> participations = eventParticipationService.getParticipationByEventAndUser(event, user);
             if (!participations.isEmpty()) {
-                EventParticipation participation = participations.get(0);
-                eventParticipationService.cancelParticipation(participation.getId());
+                EventParticipation participation = participations.get(0);//リストの最初の要素を取得
+                eventParticipationService.cancelParticipation(participation.getId());//参加記録のidでサービス層でキャンセル
             }
 
+            //成功時は200ok
             return ResponseEntity.ok("イベント参加をキャンセルしました");
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException e) {//例外処理(参加apiと同じ)
             return ResponseEntity.badRequest().body("参加キャンセルに失敗しました: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -86,4 +86,9 @@ public class EventParticipationServiceImpl implements EventParticipationService 
         List<EventParticipation> comfirmedParticipations = eventParticipationRepository.findByEventAndStatus(event, EventParticipation.ParticipationStatus.CONFIRMED);
         return comfirmedParticipations.size();
     }
+
+    @Override
+    public List<EventParticipation> getParticipationByEventAndUser(Event event, User user){
+        return eventParticipationRepository.findByEventAndUser(event, user);
+    }
 }
