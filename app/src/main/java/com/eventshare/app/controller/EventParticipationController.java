@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
  イベント参加関連のAPIエンドポイントを提供するコントローラー
  1.イベント参加登録
  2.参加キャンセル
- 3.参加状況確認
- 4.イベントの参加者一覧取得
- 5.ユーザーの参加イベント一覧取得
+ 3.イベントの参加者一覧取得
+ 4.ユーザーの参加イベント一覧取得
+ 5.参加状況確認
  */
 @RestController
 @RequestMapping("/api/events")
@@ -52,7 +52,7 @@ public class EventParticipationController {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userService.getUserByUsername(username);//ユーザー名を利用してuserServiceからユーザー情報取得
 
-            //イベントを取得
+            //URLパラメータのIDからイベント情報を取得
             Event event = eventService.getEventById(id);
 
             //既に参加しているかチェック
@@ -85,9 +85,11 @@ public class EventParticipationController {
     @DeleteMapping("/{id}/participate")
     public ResponseEntity<?> cancelParticipation(@PathVariable Long id){
         try {
+            //セキュリティコンテキスからログイン中のユーザー名取得
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userService.getUserByUsername(username);
+            User user = userService.getUserByUsername(username);//ユーザー名を利用してuserServiceからユーザー情報取得
 
+            //URLパラメータのIDからイベント情報を取得
             Event event = eventService.getEventById(id);
 
             //参加してるかチェック
@@ -112,17 +114,120 @@ public class EventParticipationController {
                     .body("参加キャンセル中にエラーが発生しました: " + e.getMessage());
         }
     }
+
+    /*
+    3. イベント参加者一覧取得API
+    GET /api/events/{id}/participants
+    */
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<?> getEventParticipants(@PathVariable Long id){
+        try {
+            //idからイベント取得
+            Event event = eventService.getEventById(id);
+            //イベントから参加者取得
+            List<EventParticipation> participations = eventParticipationService.getParticipationByEvent(event);
+            //レスポンス用意にDTOに変換
+            List<EventParticipationResponse> responses = participations.stream()//各要素へのストリーム処理
+                    .map(this::convertToParticipationResponse)//各参加記録をレスポンスDTO用に変換
+                    .collect(Collectors.toList());//リストに集約
+            return ResponseEntity.ok(responses);//okを返還
+
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("参加者一覧の取得に失敗しました");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("参加者一覧取得中にエラーが発生しました: " + e.getMessage());
+        }
+    }
+
+    /*
+    4. ユーザーの参加イベント一覧取得API
+    GET /api/events/my-participations
+    */
+    @GetMapping("/my-participations")
+    public ResponseEntity<?> getMyparticipations(){
+        try {
+            //セキュリティコンテキスからログイン中のユーザー名取得
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);//ユーザー名を利用してuserServiceからユーザー情報取得
+
+            //特定のイベントに参加している全ユーザーを取得
+            List<EventParticipation> participations = eventParticipationService.getParticipationByUser(user);
+            //レスポンス用意にDTOに変換
+            List<EventParticipationResponse> responses = participations.stream()//各要素へのストリーム処理
+                    .map(this::convertToParticipationResponse)//各参加記録をレスポンスDTO用に変換
+                    .collect(Collectors.toList());//リストに集約
+            return ResponseEntity.ok(responses);//okを返還
+
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("参加イベント一覧の取得に失敗しました");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("参加イベント一覧取得中にエラーが発生しました: " + e.getMessage());
+        }
+    }
+
+    /*
+    5. 参加状況確認API
+    GET /api/events/{id}/participation-status
+    */
+    public ResponseEntity<?> getParticipationStatus(@PathVariable Long id){
+        try {
+            //現在ログインしているユーザーを取得
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+
+            //URLパラメータのIDからイベント情報を取得
+            Event event = eventService.getEventById(id);
+
+            //ログイン中のユーザーがパラメータのイベントに参加しているかどうか
+            boolean isPaticipating = eventParticipationService.isUserParticipatingInEvent(event, user);
+            //okと参加状況を内部クラスのオブジェクトとして返す
+            return ResponseEntity.ok(new ParticipationStatusResponse(isPaticipating));
+
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("参加状況の取得に失敗しました");
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("参加状況取得中にエラーが発生しました: " + e.getMessage());
+        }
+    }
+
     /*
      EventParticipationエンティティをEventParticipationResponseに変換するヘルパーメソッド
      */
-    private EventParticipationResponse convertToParticipationResponse(com.eventshare.app.entity.EventParticipation participation) {
+    //プライベートメソッドでエンティティからDTOへ
+    private EventParticipationResponse convertToParticipationResponse(EventParticipation participation) {
+        //空のレスポンスオブジェクト生成
         EventParticipationResponse response = new EventParticipationResponse();
         response.setId(participation.getId());
         response.setEventId(participation.getEvent().getId());
         response.setEventTitle(participation.getEvent().getTitle());
         response.setUserId(participation.getUser().getId());
         response.setUsername(participation.getUser().getUsername());
+        response.setStatus(participation.getStatus().toString());
         response.setParticipatedAt(participation.getCreatedAt());
         return response;
+    }
+    /*
+    参加状況レスポンス用の内部クラス
+     */
+    public static class ParticipationStatusResponse{
+        private boolean isPaticipating;
+
+        //コンストラクタ
+        public ParticipationStatusResponse(boolean isPaticipating){
+            this.isPaticipating = isPaticipating;
+        }
+
+        //getter
+        public boolean isPaticipating(){
+            return isPaticipating();
+        }
+
+        //setter
+        public void setPaticipating(boolean paticipating){
+            isPaticipating = paticipating;
+        }
     }
 }
