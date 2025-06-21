@@ -91,7 +91,22 @@ async function loadEvents(){
             eventsList.innerHTML = '<p>現在イベントはありません</p>';
             return;
         }
-        eventsList.innerHTML = events.map(event => createEventCard(event)).join('');//イベントカードを設定し文字列へ
+        //ログイン済みの場合は参加状況も取得してイベントカードを作成
+        if (currentToken) {
+            //複数非同期処理を並行実行し、eventsWithParticipationに格納
+            const eventsWithParticipation = await Promise.all(
+                events.map(async (event) => {//mapで配列作成し個々のイベントに非同期処理
+                    const participationStatus = await checkParticipationStatus(event.id);//各イベントに参加しているか
+                    return { ...event, isParticipating: participationStatus };//イベント情報と参加情報を返す
+                })
+            );
+            //イベントカードに参加状況付きイベントを表示
+            eventsList.innerHTML = eventsWithParticipation.map(event => createEventCard(event)).join('');
+        } else {
+            //ログインしてない場合は、参加状況チェックなしで、イベントカード作成
+            eventsList.innerHTML = events.map(event => createEventCard(event)).join('');
+        }
+
     }catch(error){
         showStatus(`イベント一覧読み込み失敗：${error.message}`, true);
     }
@@ -100,15 +115,28 @@ async function loadEvents(){
 //イベントカードをhtmlで作成して返す
 function createEventCard(evt){
     const createdBy = evt.creator ? evt.creator.username : '不明';
+
+    // 参加ボタンを作成（ログイン済みの場合のみ）
+    let participationButton = '';
+    if (currentToken) {
+        //既に参加しているか
+        if (evt.isParticipating) {
+            participationButton = `<button class="cancel-btn" onclick="cancelParticipation(${evt.id})">参加キャンセル</button>`;
+        } else {
+            participationButton = `<button class="participate-btn" onclick="participateEvent(${evt.id})">参加する</button>`;
+        }
+    }
+
     return `
     <div class="event-card">
-    <h3>${evt.title}</h3>
-    <p>${evt.description || ''}</p>
-    <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>
-    <p>場所: ${evt.location || '未設定'}</p>
-    <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
-    <p>作成者: ${createdBy}</p>
-    <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
+        <h3>${evt.title}</h3>
+        <p>${evt.description || ''}</p>
+        <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>
+        <p>場所: ${evt.location || '未設定'}</p>
+        <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
+        <p>作成者: ${createdBy}</p>
+        <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
+        ${participationButton}
     </div>`;
 }
 
