@@ -160,6 +160,87 @@ async function createEvent(evt){
     }
 }
 
+//参加状況をチェックする関数（特定のイベントにユーザーが参加しているか）
+async function checkParticipationStatus(eventId){
+    if(!currentToken) return false;
+
+    try {
+        const response = await fetch(`/api/events/${eventId}/participation-status`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        //参加している時
+        if (response.ok) {
+            const result = await response.json();
+            return result.participating;
+        }
+        return false;
+    } catch (error) {
+        console.log('参加状況確認エラー:', error);
+        return false;
+    }
+}
+
+//イベント参加処理
+async function participateEvent(eventId) {
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
+    //参加処理
+    try {
+        const response = await fetch(`/api/events/${eventId}/participate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        //参加できた時
+        if (response.ok) {
+            const result = await response.json();
+            showStatus(`イベントに参加しました。ステータス: ${result.status}`);
+            loadEvents(); //イベント一覧を再読み込みしてボタンを更新
+        } else {
+            const error = await response.text();
+            showStatus(`参加に失敗しました: ${error}`, true);
+        }
+    } catch (error) {
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
+//イベント参加キャンセル処理
+async function cancelParticipation(eventId) {
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
+    //キャンセル処理
+    try {
+        const response = await fetch(`/api/events/${eventId}/participate`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        if (response.ok) {
+            showStatus('参加をキャンセルしました');
+            loadEvents(); //イベント一覧を再読み込みしてボタンを更新
+        } else {
+            const error = await response.text();
+            showStatus(`キャンセルに失敗しました: ${error}`, true);
+        }
+    } catch (error) {
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
 /*
 ログイン状態に応じてUIを切り替える関数
 */
