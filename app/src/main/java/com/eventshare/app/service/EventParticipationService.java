@@ -13,6 +13,9 @@ public interface EventParticipationService {
     //ユーザーの参加イベント一覧を取得
     List<EventParticipation> getParticipationByUser(User user);
 
+    //特定のイベントと特定のユーザーの参加情報を取得
+    List<EventParticipation> getParticipationByEventAndUser(Event event, User user);
+
     //イベント参加登録
     EventParticipation participateEvent(Event event, User user);
 
@@ -27,7 +30,4 @@ public interface EventParticipationService {
 
     //特定イベントの参加人数を取得
     int getParticipantCountForEvent(Event event);
-
-    //ユーザー名と特定イベントから参加者を取得
-    List<EventParticipation> getParticipationByEventAndUser(Event event, User user);
 }

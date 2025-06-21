@@ -33,6 +33,11 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     }
 
     @Override
+    public List<EventParticipation> getParticipationByEventAndUser(Event event, User user) {
+        return eventParticipationRepository.findByEventAndUser(event, user);
+    }
+
+    @Override
     public EventParticipation participateEvent(Event event, User user) {
         if (eventParticipationRepository.existsByEventAndUser(event, user)) {
             throw new RuntimeException("このイベントにはすでに参加しています");
@@ -62,9 +67,8 @@ public class EventParticipationServiceImpl implements EventParticipationService 
     public void cancelParticipation(Long participationId) {
         EventParticipation participation = eventParticipationRepository.findById(participationId)
                 .orElseThrow(() -> new RuntimeException("参加情報が見つかりません。ID：　" + participationId));
-        //ステータスをキャンセルに変更する
-        participation.setStatus(EventParticipation.ParticipationStatus.CANCELLED);
-        eventParticipationRepository.save(participation);
+        //参加記録を削除
+        eventParticipationRepository.delete(participation);
     }
 
     @Override
@@ -83,12 +87,7 @@ public class EventParticipationServiceImpl implements EventParticipationService 
 
     @Override
     public int getParticipantCountForEvent(Event event) {
-        List<EventParticipation> comfirmedParticipations = eventParticipationRepository.findByEventAndStatus(event, EventParticipation.ParticipationStatus.CONFIRMED);
-        return comfirmedParticipations.size();
-    }
-
-    @Override
-    public List<EventParticipation> getParticipationByEventAndUser(Event event, User user){
-        return eventParticipationRepository.findByEventAndUser(event, user);
+        List<EventParticipation> confirmedParticipations = eventParticipationRepository.findByEventAndStatus(event, EventParticipation.ParticipationStatus.CONFIRMED);
+        return confirmedParticipations.size();
     }
 }
