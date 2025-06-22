@@ -45,10 +45,45 @@ public class UserController {
             userInfo.setCreatedAt(user.getCreatedAt());
 
             return ResponseEntity.ok(userInfo);
+
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body("ユーザー情報の取得に失敗しました：　" + e.getMessage());
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ユーザー情報の取得中にエラーが発生しました：" + e.getMessage());
+        }
+    }
+
+    /*
+    2.ユーザー情報の更新
+    PUT /api/user/me
+     */
+    @PutMapping("/me")
+    public ResponseEntity<?> updateCurrentUser(@RequestBody UserUpdateRequest request){
+        try{
+            // 現在ログインしているユーザーを取得
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+
+            //自己紹介の更新
+            if (request.getBio() != null){
+                user.setBio(request.getBio());
+            }
+
+            //ユーザー情報を保存
+            User updatedUser = userService.saveUser(user);
+
+            //更新された情報をレスポンスへ
+            UserInfoResponse userInfo = new UserInfoResponse();
+            userInfo.setId(user.getId());
+            userInfo.setUsername(user.getUsername());
+            userInfo.setBio(user.getBio());
+            userInfo.setCreatedAt(user.getCreatedAt());
+
+            return ResponseEntity.ok(userInfo);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("ユーザー情報の更新に失敗しました：　" + e.getMessage());
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("ユーザー情報の更新中エラーが発生しました：　" + e.getMessage());
         }
     }
 
