@@ -269,6 +269,108 @@ async function cancelParticipation(eventId) {
     }
 }
 
+//ユーザー情報を取得する関数
+async function loadUserInfo() {
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/users/me', {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        if (response.ok) {
+            const userInfo = await response.json();
+            displayUserInfo(userInfo);
+        } else {
+            const error = await response.text();
+            showStatus(`ユーザー情報取得に失敗しました: ${error}`, true);
+        }
+    } catch (error) {
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
+//ユーザー情報を表示する関数
+function displayUserInfo(userInfo) {
+    const userInfoDiv = document.getElementById('user-info');
+    const createdDate = new Date(userInfo.createdAt).toLocaleDateString();
+
+    userInfoDiv.innerHTML = `
+        <div class="user-info-card">
+            <h3>ユーザー情報</h3>
+            <p><strong>ID:</strong> ${userInfo.id}</p>
+            <p><strong>ユーザー名:</strong> ${userInfo.username}</p>
+            <p><strong>自己紹介:</strong> ${userInfo.bio || '未設定'}</p>
+            <p><strong>登録日:</strong> ${createdDate}</p>
+        </div>
+    `;
+}
+
+//マイページを表示する関数
+function showMyPage() {
+    // 他のセクションを隠す
+    document.getElementById('events-list-section').classList.add('hidden');
+    document.getElementById('create-event-section').classList.add('hidden');
+    document.getElementById('my-page-section').classList.remove('hidden');
+
+    //ユーザー情報と参加イベントを読み込み
+    loadUserInfo();
+    loadMyParticipations();
+}
+
+//イベント一覧画面に戻る関数
+function showEventsList() {
+    document.getElementById('my-page-section').classList.add('hidden');
+    document.getElementById('events-list-section').classList.remove('hidden');
+    document.getElementById('create-event-section').classList.remove('hidden');
+}
+
+//自分の参加イベント一覧を取得する関数
+async function loadMyParticipations() {
+    if (!currentToken) return;
+
+    try {
+        const response = await fetch('/api/events/my-participations', {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        if (response.ok) {
+            const participations = await response.json();
+            displayMyParticipations(participations);
+        } else {
+            const error = await response.text();
+            showStatus(`参加イベント取得に失敗しました: ${error}`, true);
+        }
+    } catch (error) {
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
+//参加イベント一覧を表示する関数
+function displayMyParticipations(participations) {
+    const participationsDiv = document.getElementById('my-participations');
+
+    if (participations.length === 0) {
+        participationsDiv.innerHTML = '<p>まだイベントに参加していません</p>';
+        return;
+    }
+
+    participationsDiv.innerHTML = participations.map(participation => `
+        <div class="participation-card">
+            <h4>${participation.eventTitle}</h4>
+            <p><strong>ステータス:</strong> ${participation.status}</p>
+            <p><strong>参加日:</strong> ${new Date(participation.participatedAt).toLocaleDateString()}</p>
+        </div>
+    `).join('');
+}
+
 /*
 ログイン状態に応じてUIを切り替える関数
 */

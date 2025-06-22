@@ -148,6 +148,29 @@
         .cancel-btn:hover {
             background-color: #d35400;
         }
+
+        .nav-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            margin-right: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: auto;
+        }
+
+        .nav-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .user-info-card, .participation-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
@@ -192,46 +215,71 @@
 
 <!-- イベント登録セクション -->
 <div class="hidden" id="eventRegi-section">
+    <!-- ナビゲーションボタン -->
     <div class="container">
         <button class="logout-btn" onclick="logout()">ログアウト</button>
-        <h2>イベント一覧</h2>
-        <div id="events-list"></div>
+        <button class="nav-btn" onclick="showEventsList()">イベント一覧</button>
+        <button class="nav-btn" onclick="showMyPage()">マイページ</button>
     </div>
 
-    <div class="container">
-        <h2>イベント作成</h2>
-        <form id="create-event-form">
-            <div class="form-group">
-                <label for="event-title">イベントタイトル:</label>
-                <input id="event-title" required type="text">
-            </div>
-            <div class="form-group">
-                <label for="event-description">説明:</label>
-                <textarea id="event-description" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="event-date">日時:</label>
-                <input id="event-date" required type="datetime-local">
-            </div>
-            <div class="form-group">
-                <label for="event-location">場所:</label>
-                <input id="event-location" type="text">
-            </div>
-            <div class="form-group">
-                <label for="event-category">カテゴリ:</label>
-                <select id="event-category">
-                    <option value="1">野球</option>
-                    <option value="2">写真・カメラ</option>
-                    <option value="3">お笑い</option>
-                    <option value="4">その他</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="event-capacity">定員:</label>
-                <input id="event-capacity" min="1" type="number">
-            </div>
-            <button type="submit">イベント作成</button>
-        </form>
+    <!-- イベント一覧セクション -->
+    <div id="events-list-section">
+        <div class="container">
+            <h2>イベント一覧</h2>
+            <div id="events-list"></div>
+        </div>
+    </div>
+
+    <!-- イベント作成セクション -->
+    <div id="create-event-section">
+        <div class="container">
+            <h2>イベント作成</h2>
+            <form id="create-event-form">
+                <div class="form-group">
+                    <label for="event-title">イベントタイトル:</label>
+                    <input id="event-title" required type="text">
+                </div>
+                <div class="form-group">
+                    <label for="event-description">説明:</label>
+                    <textarea id="event-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="event-date">日時:</label>
+                    <input id="event-date" required type="datetime-local">
+                </div>
+                <div class="form-group">
+                    <label for="event-location">場所:</label>
+                    <input id="event-location" type="text">
+                </div>
+                <div class="form-group">
+                    <label for="event-category">カテゴリ:</label>
+                    <select id="event-category">
+                        <option value="1">野球</option>
+                        <option value="2">写真・カメラ</option>
+                        <option value="3">お笑い</option>
+                        <option value="4">その他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="event-capacity">定員:</label>
+                    <input id="event-capacity" min="1" type="number">
+                </div>
+                <button type="submit">イベント作成</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- マイページセクション -->
+    <div class="hidden" id="my-page-section">
+        <div class="container">
+            <h2>マイページ</h2>
+            <div id="user-info"></div>
+        </div>
+
+        <div class="container">
+            <h3>参加しているイベント</h3>
+            <div id="my-participations"></div>
+        </div>
     </div>
 </div>
 
