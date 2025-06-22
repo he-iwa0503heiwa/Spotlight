@@ -25,4 +25,7 @@ public interface UserService {
 
     //指定された名前のユーザーが存在するかチェック
     boolean existsByUsername(String username);
+
+    //ユーザー情報保存
+    User saveUser(User user);
 }
