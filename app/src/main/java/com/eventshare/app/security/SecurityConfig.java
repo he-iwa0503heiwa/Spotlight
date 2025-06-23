@@ -75,12 +75,20 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index.html", "/*.js", "/*.css").permitAll()
                         .requestMatchers("/api/auth/**").permitAll() //api/auth/**は誰でもアクセス可
                         .requestMatchers("/api/public/**").permitAll() //api/public/**は誰でもアクセス可
+                        .requestMatchers("/api/categories/**").permitAll() //カテゴリは認証不要
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() //イベント一覧は誰でも閲覧可
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll() //イベント詳細は誰でも閲覧可
+                        //認証が必要なエンドポイント
+                        .requestMatchers("/api/users/**").authenticated() //ユーザー情報関連
+                        .requestMatchers("/api/events/*/participate").authenticated() //イベント参加
+                        .requestMatchers("/api/events/*/participation-status").authenticated() //参加状況確認
+                        .requestMatchers("/api/events/my-participations").authenticated() //自分の参加イベント
+                        .requestMatchers("/api/events/*/participants").authenticated() //イベント参加者一覧
+
                         .anyRequest().authenticated() //それ以外はアクセス不可
                 );
 
-        //JWTをpring Securityのフィルターの前にする（リクエストが来たときに、ログインチェックの前にトークンの検証を先に実行）
+        //JWTをSpring Securityのフィルターの前にする（リクエストが来たときに、ログインチェックの前にトークンの検証を先に実行）
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         //↑の設定をもとにSecurityFilterChainを作成→適用

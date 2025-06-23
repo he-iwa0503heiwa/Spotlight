@@ -54,7 +54,11 @@ async function userLogin(evt){
     const username = document.getElementById('login-username').value;//value:インプット要素で入力された値を取得
     const password = document.getElementById('login-password').value;
 
+    console.log('入力値:', { username, password: '***' });
+
    try{
+        console.log('APIリクエスト送信中...');
+
         //fetchでサーバー側と通信する
         const response = await fetch('/api/auth/login', {
             method: 'POST',
@@ -62,20 +66,30 @@ async function userLogin(evt){
             body: JSON.stringify({username, password})
         });
 
+        console.log('APIレスポンス受信:', response.status, response.ok);
+
         if (response.ok){
             const result = await response.json();//サーバーから返ってきたjsonデータを取得
+            console.log('ログイン成功:', result);
+
             currentToken = result.token;//サーバーからのjwtトークン
             currentUser = result;
+            console.log('トークン設定完了:', currentToken);
+            console.log('ユーザー設定完了:', currentUser);
 
             showMainSection();//メイン画面に切り替え
             showStatus(`ログイン成功： こんにちは、${result.username}さん`);
             loadEvents();//イベント一覧読み込み
+
+            console.log('=== ログイン処理完了 ===');
         }else{
             const error = await response.text();//エラー時はテキストで変換される
+            console.log('ログインエラー:', error);
             showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
         }
     }catch (error){//通信エラー
         showStatus(`エラー：${error.message}`, true);
+        console.log('例外発生:', error);
     }
 }
 
@@ -309,6 +323,17 @@ function displayUserInfo(userInfo) {
             <p><strong>登録日:</strong> ${createdDate}</p>
         </div>
     `;
+}
+
+//現在のトークンが正しく保存されているか確認
+console.log('Current Token:', currentToken);
+console.log('Current User:', currentUser);
+
+//トークンの中身を確認 JWTデコード
+if (currentToken) {
+    const payload = JSON.parse(atob(currentToken.split('.')[1]));
+    console.log('Token Payload:', payload);
+    console.log('Token Expiry:', new Date(payload.exp * 1000));
 }
 
 //マイページを表示する関数
