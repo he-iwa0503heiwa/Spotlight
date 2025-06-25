@@ -331,9 +331,13 @@ console.log('Current User:', currentUser);
 
 //トークンの中身を確認 JWTデコード
 if (currentToken) {
-    const payload = JSON.parse(atob(currentToken.split('.')[1]));
-    console.log('Token Payload:', payload);
-    console.log('Token Expiry:', new Date(payload.exp * 1000));
+    try {
+        const payload = JSON.parse(atob(currentToken.split('.')[1]));
+        console.log('Token Payload:', payload);
+        console.log('Token Expiry:', new Date(payload.exp * 1000));
+    } catch (e) {
+        console.log('Token decode error:', e);
+    }
 }
 
 //マイページを表示する関数
