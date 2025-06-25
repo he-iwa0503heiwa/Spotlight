@@ -96,32 +96,47 @@ async function userLogin(evt){
 //イベントの一覧読み込み処理
 async function loadEvents(){
     try{
+        console.log('=== イベント一覧読み込み開始 ===');
         const response = await fetch('/api/events');
         const events = await response.json();
-        const eventsList = document.getElementById('events-list');//htmlからイベントリスト取得
+        const eventsList = document.getElementById('events-list');
+
+        console.log('取得したイベント数:', events.length);
+        console.log('現在のトークン:', currentToken ? 'あり' : 'なし');
 
         //イベントがなかった場合
         if (events.length === 0) {
             eventsList.innerHTML = '<p>現在イベントはありません</p>';
             return;
         }
+
         //ログイン済みの場合は参加状況も取得してイベントカードを作成
         if (currentToken) {
+            console.log('ログイン済み - 参加状況をチェックします');
+
             //複数非同期処理を並行実行し、eventsWithParticipationに格納
             const eventsWithParticipation = await Promise.all(
-                events.map(async (event) => {//mapで配列作成し個々のイベントに非同期処理
-                    const participationStatus = await checkParticipationStatus(event.id);//各イベントに参加しているか
-                    return { ...event, isParticipating: participationStatus };//イベント情報と参加情報を返す
+                events.map(async (event) => {
+                    console.log(`イベント${event.id}の参加状況をチェック中...`);
+                    const participationStatus = await checkParticipationStatus(event.id);
+                    console.log(`イベント${event.id}の参加状況結果:`, participationStatus);
+                    return { ...event, isParticipating: participationStatus };
                 })
             );
+
+            console.log('参加状況付きイベント一覧:', eventsWithParticipation);
             //イベントカードに参加状況付きイベントを表示
             eventsList.innerHTML = eventsWithParticipation.map(event => createEventCard(event)).join('');
         } else {
+            console.log('未ログイン - 参加状況チェックなし');
             //ログインしてない場合は、参加状況チェックなしで、イベントカード作成
             eventsList.innerHTML = events.map(event => createEventCard(event)).join('');
         }
 
+        console.log('=== イベント一覧読み込み完了 ===');
+
     }catch(error){
+        console.error('イベント一覧読み込みエラー:', error);
         showStatus(`イベント一覧読み込み失敗：${error.message}`, true);
     }
 }
@@ -133,6 +148,7 @@ function createEventCard(evt){
     // 参加ボタンを作成（ログイン済みの場合のみ）
     let participationButton = '';
     if (currentToken) {
+        console.log(`イベント${evt.id}のボタン作成 - 参加状況:`, evt.isParticipating);
         //既に参加しているか
         if (evt.isParticipating) {
             participationButton = `<button class="cancel-btn" onclick="cancelParticipation(${evt.id})">参加キャンセル</button>`;
@@ -150,6 +166,7 @@ function createEventCard(evt){
         <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
         <p>作成者: ${createdBy}</p>
         <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
+        <p><strong>デバッグ: 参加状況 = ${evt.isParticipating ? '参加済み' : '未参加'}</strong></p>
         ${participationButton}
     </div>`;
 }
@@ -207,16 +224,24 @@ async function checkParticipationStatus(eventId){
     if(!currentToken) return false;
 
     try {
+        console.log(`=== 参加状況チェック開始: イベントID ${eventId} ===`);
+
         const response = await fetch(`/api/events/${eventId}/participation-status`, {
             headers: {
                 'Authorization': `Bearer ${currentToken}`
             }
         });
 
+        console.log(`イベント${eventId}の参加状況チェック - ステータス:`, response.status);
+
         //参加している時
         if (response.ok) {
             const result = await response.json();
+            console.log(`イベント${eventId}の参加状況:`, result);
+            console.log(`participating プロパティ:`, result.participating);
             return result.participating;
+        } else {
+            console.log(`イベント${eventId}の参加状況チェック失敗:`, response.status);
         }
         return false;
     } catch (error) {
