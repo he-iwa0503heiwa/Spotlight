@@ -182,9 +182,9 @@ public class EventParticipationController {
             Event event = eventService.getEventById(id);
 
             //ログイン中のユーザーがパラメータのイベントに参加しているかどうか
-            boolean isPaticipating = eventParticipationService.isUserParticipatingInEvent(event, user);
+            boolean isParticipating = eventParticipationService.isUserParticipatingInEvent(event, user);
             //okと参加状況を内部クラスのオブジェクトとして返す
-            return ResponseEntity.ok(new ParticipationStatusResponse(isPaticipating));
+            return ResponseEntity.ok(new ParticipationStatusResponse(isParticipating));
 
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body("参加状況の取得に失敗しました");
@@ -222,13 +222,13 @@ public class EventParticipationController {
         }
 
         //getter
-        public boolean isPaticipating(){
+        public boolean isParticipating(){
             return participating;
         }
 
         //setter
-        public void setPaticipating(boolean paticipating){
-            this.participating = paticipating;
+        public void setParticipating(boolean participating){
+            this.participating = participating;
         }
     }
 }
