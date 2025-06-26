@@ -171,6 +171,7 @@ public class EventParticipationController {
     5. 参加状況確認API
     GET /api/events/{id}/participation-status
     */
+    @GetMapping("/{id}/participation-status")
     public ResponseEntity<?> getParticipationStatus(@PathVariable Long id){
         try {
             //現在ログインしているユーザーを取得
@@ -213,21 +214,21 @@ public class EventParticipationController {
     参加状況レスポンス用の内部クラス
      */
     public static class ParticipationStatusResponse{
-        private boolean isPaticipating;
+        private boolean participating;
 
         //コンストラクタ
-        public ParticipationStatusResponse(boolean isPaticipating){
-            this.isPaticipating = isPaticipating;
+        public ParticipationStatusResponse(boolean participating){
+            this.participating = participating;
         }
 
         //getter
         public boolean isPaticipating(){
-            return isPaticipating();
+            return participating;
         }
 
         //setter
         public void setPaticipating(boolean paticipating){
-            isPaticipating = paticipating;
+            this.participating = paticipating;
         }
     }
 }

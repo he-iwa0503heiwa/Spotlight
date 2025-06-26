@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 2.ユーザー情報の更新
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
