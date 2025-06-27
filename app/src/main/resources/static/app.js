@@ -166,7 +166,7 @@ function createEventCard(evt){
         <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
         <p>作成者: ${createdBy}</p>
         <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
-        <p><strong>デバッグ: 参加状況 = ${evt.isParticipating ? '参加済み' : '未参加'}</strong></p>
+        //<p><strong>デバッグ: 参加状況 = ${evt.isParticipating ? '参加済み' : '未参加'}</strong></p>
         ${participationButton}
     </div>`;
 }
