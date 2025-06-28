@@ -1,6 +1,7 @@
 //ログイン状態を管理するグローバル関数
 let currentToken = null;
 let currentUser = null;
+let editingEventId = null; // 編集中のイベントID
 
 //ステータスを表示する関数
 function showStatus(message, isError = false) {
@@ -96,47 +97,32 @@ async function userLogin(evt){
 //イベントの一覧読み込み処理
 async function loadEvents(){
     try{
-        console.log('=== イベント一覧読み込み開始 ===');
         const response = await fetch('/api/events');
         const events = await response.json();
-        const eventsList = document.getElementById('events-list');
-
-        console.log('取得したイベント数:', events.length);
-        console.log('現在のトークン:', currentToken ? 'あり' : 'なし');
+        const eventsList = document.getElementById('events-list');//htmlからイベントリスト取得
 
         //イベントがなかった場合
         if (events.length === 0) {
             eventsList.innerHTML = '<p>現在イベントはありません</p>';
             return;
         }
-
         //ログイン済みの場合は参加状況も取得してイベントカードを作成
         if (currentToken) {
-            console.log('ログイン済み - 参加状況をチェックします');
-
             //複数非同期処理を並行実行し、eventsWithParticipationに格納
             const eventsWithParticipation = await Promise.all(
-                events.map(async (event) => {
-                    console.log(`イベント${event.id}の参加状況をチェック中...`);
-                    const participationStatus = await checkParticipationStatus(event.id);
-                    console.log(`イベント${event.id}の参加状況結果:`, participationStatus);
-                    return { ...event, isParticipating: participationStatus };
+                events.map(async (event) => {//mapで配列作成し個々のイベントに非同期処理
+                    const participationStatus = await checkParticipationStatus(event.id);//各イベントに参加しているか
+                    return { ...event, isParticipating: participationStatus };//イベント情報と参加情報を返す
                 })
             );
-
-            console.log('参加状況付きイベント一覧:', eventsWithParticipation);
             //イベントカードに参加状況付きイベントを表示
             eventsList.innerHTML = eventsWithParticipation.map(event => createEventCard(event)).join('');
         } else {
-            console.log('未ログイン - 参加状況チェックなし');
             //ログインしてない場合は、参加状況チェックなしで、イベントカード作成
             eventsList.innerHTML = events.map(event => createEventCard(event)).join('');
         }
 
-        console.log('=== イベント一覧読み込み完了 ===');
-
     }catch(error){
-        console.error('イベント一覧読み込みエラー:', error);
         showStatus(`イベント一覧読み込み失敗：${error.message}`, true);
     }
 }
@@ -148,7 +134,6 @@ function createEventCard(evt){
     // 参加ボタンを作成（ログイン済みの場合のみ）
     let participationButton = '';
     if (currentToken) {
-        console.log(`イベント${evt.id}のボタン作成 - 参加状況:`, evt.isParticipating);
         //既に参加しているか
         if (evt.isParticipating) {
             participationButton = `<button class="cancel-btn" onclick="cancelParticipation(${evt.id})">参加キャンセル</button>`;
@@ -157,8 +142,19 @@ function createEventCard(evt){
         }
     }
 
+    // 編集・削除ボタン（作成者のみ表示）
+    let managementButtons = '';
+    if (currentToken && currentUser && evt.creator && evt.creator.id === currentUser.id) {
+        managementButtons = `
+            <div class="management-buttons">
+                <button class="edit-btn" onclick="startEditEvent(${evt.id})">編集</button>
+                <button class="delete-btn" onclick="deleteEvent(${evt.id})">削除</button>
+            </div>
+        `;
+    }
+
     return `
-    <div class="event-card">
+    <div class="event-card" id="event-card-${evt.id}">
         <h3>${evt.title}</h3>
         <p>${evt.description || ''}</p>
         <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>
@@ -166,14 +162,17 @@ function createEventCard(evt){
         <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
         <p>作成者: ${createdBy}</p>
         <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
-        //<p><strong>デバッグ: 参加状況 = ${evt.isParticipating ? '参加済み' : '未参加'}</strong></p>
-        ${participationButton}
+        <div class="button-container">
+            ${participationButton}
+            ${managementButtons}
+        </div>
     </div>`;
 }
 
 //イベント作成処理
 async function createEvent(evt){
     evt.preventDefault();//ページリロードを防ぐ
+
     const title = document.getElementById('event-title').value;
     const description = document.getElementById('event-description').value;
     const eventDate = document.getElementById('event-date').value;
@@ -188,9 +187,20 @@ async function createEvent(evt){
     }
 
     try{
-        //新しいイベント作成
-        const response = await fetch('/api/events', {
-            method: 'POST',
+        let url = '/api/events';
+        let method = 'POST';
+        let successMessage = 'イベントが作成されました';
+
+        // 編集モードの場合
+        if (editingEventId) {
+            url = `/api/events/${editingEventId}`;
+            method = 'PUT';
+            successMessage = 'イベントが更新されました';
+        }
+
+        //新しいイベント作成または更新
+        const response = await fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${currentToken}`//認証ヘッダー
@@ -207,14 +217,122 @@ async function createEvent(evt){
 
         if (response.ok){
             const result = await response.json();
-            showStatus('イベントが作成されました');
-            document.getElementById('create-event-form').reset();//フォーム要素取得してフォームクリア
-            loadEvents();//新しく作成したイベントをサーバーから最新取得と画面に反映
+            showStatus(successMessage);
+
+            //フォームをリセットして編集モードを終了
+            document.getElementById('create-event-form').reset();
+            cancelEditEvent();
+
+            loadEvents();//イベント一覧を再読み込み
         }else{
             const error = await response.text();
-            showStatus(`イベント作成に失敗しました: ${error}`, true);
+            showStatus(`${editingEventId ? 'イベント更新' : 'イベント作成'}に失敗しました: ${error}`, true);
         }
     }catch(error){
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
+//イベント編集開始
+async function startEditEvent(eventId) {
+    try {
+        // イベント詳細を取得
+        const response = await fetch(`/api/events/${eventId}`);
+        if (!response.ok) {
+            throw new Error('イベント情報の取得に失敗しました');
+        }
+
+        const event = await response.json();
+
+        //フォームに既存の値を設定
+        document.getElementById('event-title').value = event.title;
+        document.getElementById('event-description').value = event.description || '';
+        document.getElementById('event-date').value = new Date(event.eventDate).toISOString().slice(0, 16);
+        document.getElementById('event-location').value = event.location || '';
+        document.getElementById('event-category').value = event.category.id;
+        document.getElementById('event-capacity').value = event.capacity || '';
+
+        //編集モードに設定
+        editingEventId = eventId;
+        document.getElementById('create-event-title').textContent = 'イベント編集';
+        document.getElementById('create-event-submit').textContent = '更新';
+
+        //キャンセルボタンを表示
+        showCancelEditButton();
+
+        //フォームまでスクロール
+        document.getElementById('create-event-section').scrollIntoView({ behavior: 'smooth' });
+
+        showStatus('編集モードに切り替えました');
+
+    } catch (error) {
+        showStatus(`エラー：${error.message}`, true);
+    }
+}
+
+//イベント編集キャンセル
+function cancelEditEvent() {
+    editingEventId = null;
+    document.getElementById('create-event-title').textContent = 'イベント作成';
+    document.getElementById('create-event-submit').textContent = 'イベント作成';
+    hideCancelEditButton();
+}
+
+//キャンセルボタンの表示
+function showCancelEditButton() {
+    let cancelButton = document.getElementById('cancel-edit-btn');
+    if (!cancelButton) {
+        cancelButton = document.createElement('button');
+        cancelButton.id = 'cancel-edit-btn';
+        cancelButton.type = 'button';
+        cancelButton.className = 'cancel-edit-btn';
+        cancelButton.textContent = '編集キャンセル';
+        cancelButton.onclick = () => {
+            document.getElementById('create-event-form').reset();
+            cancelEditEvent();
+            showStatus('編集をキャンセルしました');
+        };
+        document.getElementById('create-event-submit').parentNode.appendChild(cancelButton);
+    }
+    cancelButton.style.display = 'inline-block';
+}
+
+//キャンセルボタンの非表示
+function hideCancelEditButton() {
+    const cancelButton = document.getElementById('cancel-edit-btn');
+    if (cancelButton) {
+        cancelButton.style.display = 'none';
+    }
+}
+
+//イベント削除
+async function deleteEvent(eventId) {
+    // 確認ダイアログ
+    if (!confirm('本当にこのイベントを削除しますか？\n※参加者がいる場合も削除されます。')) {
+        return;
+    }
+
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/events/${eventId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        if (response.ok) {
+            showStatus('イベントが削除されました');
+            loadEvents(); //イベント一覧を再読み込み
+        } else {
+            const error = await response.text();
+            showStatus(`イベント削除に失敗しました: ${error}`, true);
+        }
+    } catch (error) {
         showStatus(`エラー：${error.message}`, true);
     }
 }
@@ -224,24 +342,16 @@ async function checkParticipationStatus(eventId){
     if(!currentToken) return false;
 
     try {
-        console.log(`=== 参加状況チェック開始: イベントID ${eventId} ===`);
-
         const response = await fetch(`/api/events/${eventId}/participation-status`, {
             headers: {
                 'Authorization': `Bearer ${currentToken}`
             }
         });
 
-        console.log(`イベント${eventId}の参加状況チェック - ステータス:`, response.status);
-
         //参加している時
         if (response.ok) {
             const result = await response.json();
-            console.log(`イベント${eventId}の参加状況:`, result);
-            console.log(`participating プロパティ:`, result.participating);
             return result.participating;
-        } else {
-            console.log(`イベント${eventId}の参加状況チェック失敗:`, response.status);
         }
         return false;
     } catch (error) {
@@ -350,21 +460,6 @@ function displayUserInfo(userInfo) {
     `;
 }
 
-//現在のトークンが正しく保存されているか確認
-console.log('Current Token:', currentToken);
-console.log('Current User:', currentUser);
-
-//トークンの中身を確認 JWTデコード
-if (currentToken) {
-    try {
-        const payload = JSON.parse(atob(currentToken.split('.')[1]));
-        console.log('Token Payload:', payload);
-        console.log('Token Expiry:', new Date(payload.exp * 1000));
-    } catch (e) {
-        console.log('Token decode error:', e);
-    }
-}
-
 //マイページを表示する関数
 function showMyPage() {
     // 他のセクションを隠す
@@ -382,6 +477,12 @@ function showEventsList() {
     document.getElementById('my-page-section').classList.add('hidden');
     document.getElementById('events-list-section').classList.remove('hidden');
     document.getElementById('create-event-section').classList.remove('hidden');
+
+    //編集モードをキャンセル
+    if (editingEventId) {
+        document.getElementById('create-event-form').reset();
+        cancelEditEvent();
+    }
 }
 
 //自分の参加イベント一覧を取得する関数
@@ -443,8 +544,11 @@ function showAuthSection(){
 function logout(){
     currentToken = null;
     currentUser = null;
+    editingEventId = null;
 
     showAuthSection();
     document.getElementById('login-form').reset();
+    document.getElementById('create-event-form').reset();
+    cancelEditEvent();
     showStatus('ログアウトしました');
 }
