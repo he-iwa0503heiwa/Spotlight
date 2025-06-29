@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.bind.validation.ValidationErr
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -47,6 +48,37 @@ public class GlobalExceptionHandler {
         //400エラーとしてJSONレスポンスを返す
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    /*
+    バリデーション以外のRuntime例外のハンドリング
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex){
+        //エラーレスポンス生成
+        ErrorResponse errorResponse = new ErrorResponse(
+                "エラー",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /*
+    予期しない例外のハンドリング
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex){
+        //エラーレスポンス生成
+        ErrorResponse errorResponse = new ErrorResponse(
+                "エラー",
+                "予期しないエラーが発生しました。しばらく時間をおいて再度お試しください。",
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     /*
     バリデーションエラー用のレスポンス内部クラス
      */
@@ -74,6 +106,33 @@ public class GlobalExceptionHandler {
         public void setError(String error) { this.error = error; }
         public void setMessage(String message) { this.message = message; }
         public void setFieldErrors(Map<String, String> fieldErrors) { this.fieldErrors = fieldErrors; }
+        public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    }
+
+    /*
+     一般的なエラーレスポンス用の内部クラス
+     */
+    public static class ErrorResponse {  //バリデーションエラー以外の、シンプルなエラー用のクラス
+
+        private String error;           //エラーの種類
+        private String message;         //エラーメッセージ
+        private LocalDateTime timestamp; //エラー発生日時
+
+        //コンストラクタ
+        public ErrorResponse(String error, String message, LocalDateTime timestamp) {
+            this.error = error;
+            this.message = message;
+            this.timestamp = timestamp;
+        }
+
+        //Getter
+        public String getError() { return error; }
+        public String getMessage() { return message; }
+        public LocalDateTime getTimestamp() { return timestamp; }
+
+        //Setter
+        public void setError(String error) { this.error = error; }
+        public void setMessage(String message) { this.message = message; }
         public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
     }
 }
