@@ -127,6 +127,7 @@
             font-size: 14px;
             margin-top: 10px;
             width: auto;
+            margin-right: 5px;
         }
 
         .participate-btn:hover {
@@ -143,10 +144,63 @@
             font-size: 14px;
             margin-top: 10px;
             width: auto;
+            margin-right: 5px;
         }
 
         .cancel-btn:hover {
             background-color: #d35400;
+        }
+
+        /* 編集・削除ボタンのスタイル */
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .edit-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .cancel-edit-btn {
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+            margin-left: 10px;
+            display: none;
+        }
+
+        .cancel-edit-btn:hover {
+            background-color: #7f8c8d;
         }
 
         .nav-btn {
@@ -170,6 +224,16 @@
             padding: 15px;
             margin: 10px 0;
             background-color: #f9f9f9;
+        }
+
+        .button-container {
+            margin-top: 10px;
+        }
+
+        .management-buttons {
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
         }
     </style>
 </head>
@@ -233,7 +297,7 @@
     <!-- イベント作成セクション -->
     <div id="create-event-section">
         <div class="container">
-            <h2>イベント作成</h2>
+            <h2 id="create-event-title">イベント作成</h2>
             <form id="create-event-form">
                 <div class="form-group">
                     <label for="event-title">イベントタイトル:</label>
@@ -264,7 +328,7 @@
                     <label for="event-capacity">定員:</label>
                     <input id="event-capacity" min="1" type="number">
                 </div>
-                <button type="submit">イベント作成</button>
+                <button type="submit" id="create-event-submit">イベント作成</button>
             </form>
         </div>
     </div>
