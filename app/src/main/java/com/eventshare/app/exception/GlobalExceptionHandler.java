@@ -17,13 +17,14 @@ import java.util.Map;
 グローバル例外ハンドラー
 このクラスで全体の例外を統一管理
  */
+//すべてのコントローラーで発生した例外をここで処理
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /*
     バリデーションエラーのハンドリング
     @Validアノテーションで発生したエラーを処理
      */
-    //すべてのコントローラーで発生した例外をここで処理
+    //MethodArgumentNotValidExceptionはSpring Bootのバリデーション機能（@Validアノテーションを発見したら実行）
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex){

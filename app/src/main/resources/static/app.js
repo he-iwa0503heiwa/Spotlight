@@ -12,9 +12,75 @@ function showStatus(message, isError = false) {
     }, 3000)//3秒後にinnerHTMLを空に
 }
 
+//バリデーションエラーを表示する関数
+function showValidationErrors(errors) {
+    //既存のエラー表示をクリア
+    clearValidationErrors();
+
+    //各フィールドにエラーメッセージを表示
+    Object.keys(errors).forEach(fieldName => {
+        const fieldElement = document.getElementById(fieldName);
+        if (fieldElement) {
+            //フィールドを赤枠にする
+            fieldElement.style.borderColor = '#e74c3c';
+            fieldElement.style.borderWidth = '2px';
+
+            //エラーメッセージを表示
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error';
+            errorDiv.textContent = errors[fieldName];
+            errorDiv.style.color = '#e74c3c';
+            errorDiv.style.fontSize = '14px';
+            errorDiv.style.marginTop = '5px';
+
+            fieldElement.parentNode.appendChild(errorDiv);
+        }
+    });
+}
+
+//バリデーションエラーをクリアする関数
+function clearValidationErrors() {
+    //すべてのエラーメッセージを削除
+    const errorElements = document.querySelectorAll('.field-error');
+    errorElements.forEach(element => element.remove());
+
+    //すべてのフィールドの赤枠を削除
+    const inputElements = document.querySelectorAll('input, textarea, select');
+    inputElements.forEach(element => {
+        element.style.borderColor = '#ddd';
+        element.style.borderWidth = '1px';
+    });
+}
+
+//エラーレスポンスを処理する共通関数
+async function handleErrorResponse(response) {
+    const contentType = response.headers.get('content-type');
+
+    if (contentType && contentType.includes('application/json')) {
+        //JSONエラー（バリデーションエラーなど）
+        const errorData = await response.json();
+
+        if (errorData.fieldErrors) {
+            //バリデーションエラーの場合
+            showValidationErrors(errorData.fieldErrors);
+            showStatus(errorData.message || 'バリデーションエラーがあります', true);
+        } else {
+            //その他のJSONエラー
+            showStatus(errorData.message || 'エラーが発生しました', true);
+        }
+    } else {
+        // テキストエラー
+        const errorText = await response.text();
+        showStatus(`エラー：${errorText}`, true);
+    }
+}
+
 //ユーザー登録処理
 async function userRegister(evt) {
     evt.preventDefault();//ページリロードを防ぐ
+
+    //バリデーションエラーをクリア
+    clearValidationErrors();
 
     const username = document.getElementById('username').value;//value:インプット要素で入力された値を取得
     const password = document.getElementById('password').value;
@@ -37,10 +103,10 @@ async function userRegister(evt) {
             console.log('登録成功:', result); //デバッグログ追加取得用
             showStatus(`登録成功： ${result.username}さん、ようこそ`);
             document.getElementById('register-form').reset();
+            clearValidationErrors(); //成功時もエラー表示をクリア
         }else{
-            const error = await response.text();//エラー時はテキストで変換される
-            console.log('登録エラー:', error); //デバッグログ追加取得用
-            showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
+            console.log('登録エラー:', response.status); //デバッグログ追加取得用
+            await handleErrorResponse(response);
         }
     }catch (error){//通信エラー
         console.log('例外発生:', error); //デバッグログ追加取得用
@@ -51,6 +117,9 @@ async function userRegister(evt) {
 //ログイン処理
 async function userLogin(evt){
     evt.preventDefault();//ページリロードを防ぐ
+
+    //バリデーションエラーをクリア
+    clearValidationErrors();
 
     const username = document.getElementById('login-username').value;//value:インプット要素で入力された値を取得
     const password = document.getElementById('login-password').value;
@@ -81,12 +150,12 @@ async function userLogin(evt){
             showMainSection();//メイン画面に切り替え
             showStatus(`ログイン成功： こんにちは、${result.username}さん`);
             loadEvents();//イベント一覧読み込み
+            clearValidationErrors(); //成功時もエラー表示をクリア
 
             console.log('=== ログイン処理完了 ===');
         }else{
-            const error = await response.text();//エラー時はテキストで変換される
-            console.log('ログインエラー:', error);
-            showStatus(`エラー：${error}`, true);//ステータスをエラーにして返す
+            console.log('ログインエラー:', response.status);
+            await handleErrorResponse(response);
         }
     }catch (error){//通信エラー
         showStatus(`エラー：${error.message}`, true);
@@ -131,7 +200,7 @@ async function loadEvents(){
 function createEventCard(evt){
     const createdBy = evt.creator ? evt.creator.username : '不明';
 
-    // 参加ボタンを作成（ログイン済みの場合のみ）
+    //参加ボタンを作成（ログイン済みの場合のみ）
     let participationButton = '';
     if (currentToken) {
         //既に参加しているか
@@ -142,7 +211,7 @@ function createEventCard(evt){
         }
     }
 
-    // 編集・削除ボタン（作成者のみ表示）
+    //編集・削除ボタン（作成者のみ表示）
     let managementButtons = '';
     if (currentToken && currentUser && evt.creator && evt.creator.id === currentUser.id) {
         managementButtons = `
@@ -172,6 +241,9 @@ function createEventCard(evt){
 //イベント作成処理
 async function createEvent(evt){
     evt.preventDefault();//ページリロードを防ぐ
+
+    //バリデーションエラーをクリア
+    clearValidationErrors();
 
     const title = document.getElementById('event-title').value;
     const description = document.getElementById('event-description').value;
@@ -222,11 +294,11 @@ async function createEvent(evt){
             //フォームをリセットして編集モードを終了
             document.getElementById('create-event-form').reset();
             cancelEditEvent();
+            clearValidationErrors(); //成功時もエラー表示をクリア
 
             loadEvents();//イベント一覧を再読み込み
         }else{
-            const error = await response.text();
-            showStatus(`${editingEventId ? 'イベント更新' : 'イベント作成'}に失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     }catch(error){
         showStatus(`エラー：${error.message}`, true);
@@ -236,7 +308,10 @@ async function createEvent(evt){
 //イベント編集開始
 async function startEditEvent(eventId) {
     try {
-        // イベント詳細を取得
+        //バリデーションエラーをクリア
+        clearValidationErrors();
+
+        //イベント詳細を取得
         const response = await fetch(`/api/events/${eventId}`);
         if (!response.ok) {
             throw new Error('イベント情報の取得に失敗しました');
@@ -276,6 +351,7 @@ function cancelEditEvent() {
     document.getElementById('create-event-title').textContent = 'イベント作成';
     document.getElementById('create-event-submit').textContent = 'イベント作成';
     hideCancelEditButton();
+    clearValidationErrors(); //編集キャンセル時もエラー表示をクリア
 }
 
 //キャンセルボタンの表示
@@ -307,7 +383,7 @@ function hideCancelEditButton() {
 
 //イベント削除
 async function deleteEvent(eventId) {
-    // 確認ダイアログ
+    //確認ダイアログ
     if (!confirm('本当にこのイベントを削除しますか？\n※参加者がいる場合も削除されます。')) {
         return;
     }
@@ -329,8 +405,7 @@ async function deleteEvent(eventId) {
             showStatus('イベントが削除されました');
             loadEvents(); //イベント一覧を再読み込み
         } else {
-            const error = await response.text();
-            showStatus(`イベント削除に失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     } catch (error) {
         showStatus(`エラー：${error.message}`, true);
@@ -382,8 +457,7 @@ async function participateEvent(eventId) {
             showStatus(`イベントに参加しました。ステータス: ${result.status}`);
             loadEvents(); //イベント一覧を再読み込みしてボタンを更新
         } else {
-            const error = await response.text();
-            showStatus(`参加に失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     } catch (error) {
         showStatus(`エラー：${error.message}`, true);
@@ -410,8 +484,7 @@ async function cancelParticipation(eventId) {
             showStatus('参加をキャンセルしました');
             loadEvents(); //イベント一覧を再読み込みしてボタンを更新
         } else {
-            const error = await response.text();
-            showStatus(`キャンセルに失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     } catch (error) {
         showStatus(`エラー：${error.message}`, true);
@@ -436,8 +509,7 @@ async function loadUserInfo() {
             const userInfo = await response.json();
             displayUserInfo(userInfo);
         } else {
-            const error = await response.text();
-            showStatus(`ユーザー情報取得に失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     } catch (error) {
         showStatus(`エラー：${error.message}`, true);
@@ -466,6 +538,9 @@ function showMyPage() {
     document.getElementById('events-list-section').classList.add('hidden');
     document.getElementById('create-event-section').classList.add('hidden');
     document.getElementById('my-page-section').classList.remove('hidden');
+
+    //バリデーションエラーをクリア
+    clearValidationErrors();
 
     //ユーザー情報と参加イベントを読み込み
     loadUserInfo();
@@ -500,8 +575,7 @@ async function loadMyParticipations() {
             const participations = await response.json();
             displayMyParticipations(participations);
         } else {
-            const error = await response.text();
-            showStatus(`参加イベント取得に失敗しました: ${error}`, true);
+            await handleErrorResponse(response);
         }
     } catch (error) {
         showStatus(`エラー：${error.message}`, true);
@@ -538,6 +612,9 @@ function showMainSection() {
 function showAuthSection(){
     document.getElementById('auth-section').classList.remove('hidden');//ログイン画面を表示
     document.getElementById('eventRegi-section').classList.add('hidden');//メイン画面を隠す
+
+    //バリデーションエラーをクリア
+    clearValidationErrors();
 }
 
 //ログアウト
@@ -550,5 +627,6 @@ function logout(){
     document.getElementById('login-form').reset();
     document.getElementById('create-event-form').reset();
     cancelEditEvent();
+    clearValidationErrors(); //ログアウト時もエラー表示をクリア
     showStatus('ログアウトしました');
 }
