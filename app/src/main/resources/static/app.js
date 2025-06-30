@@ -69,7 +69,7 @@ async function handleErrorResponse(response) {
             showStatus(errorData.message || 'エラーが発生しました', true);
         }
     } else {
-        // テキストエラー
+        //テキストエラー
         const errorText = await response.text();
         showStatus(`エラー：${errorText}`, true);
     }
@@ -90,7 +90,7 @@ async function userRegister(evt) {
 
     try{
         //fetchでサーバー側と通信する
-        console.log('APIリクエスト送信前'); // デバッグログ追加
+        console.log('APIリクエスト送信前'); //デバッグログ追加
         const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
