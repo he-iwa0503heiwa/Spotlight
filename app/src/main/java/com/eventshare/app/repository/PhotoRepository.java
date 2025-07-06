@@ -16,12 +16,12 @@ public interface PhotoRepository extends JpaRepository<Photo, Long> {
     List<Photo> findByEventOrderByUploadedAtDesc(Event event);
 
     //特定のユーザーがアップロードした写真一覧を降順で取得
-    List<Photo> findByUploadByOrderByUploadedAtDesc(User user);
+    List<Photo> findByUploadedByOrderByUploadedAtDesc(User user);
 
     //イベントの写真数を取得（カスタムクエリ）
     @Query("SELECT COUNT(p) FROM Photo p WHERE p.event = :event")
     long countByEvent(@Param("event") Event event);
 
     //特定のイベントで特定のユーザーがアップロードした写真を取得
-    List<Photo> findByEventAndUploadByOrderByUploadedAtDesc(Event event, User user);
+    List<Photo> findByEventAndUploadedByOrderByUploadedAtDesc(Event event, User user);
 }
