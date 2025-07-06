@@ -60,10 +60,10 @@ public class PhotoServiceImpl implements PhotoService {
             //データベースに写真情報を保存
             Photo photo = new Photo();
             photo.setFilename(filename);
-            photo.setOriginalFilename(originalFilename);
+            photo.setUploadFilename(originalFilename);
             photo.setCaption(caption);
             photo.setFileSize(file.getSize());
-            photo.setContentType(file.getContentType());
+            photo.setMineType(file.getContentType());
             photo.setEvent(event);
             photo.setUploadedBy(user);
 
