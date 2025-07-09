@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/photos")
@@ -37,7 +39,7 @@ public class PhotoController {
     @PostMapping("/upload/{eventID}")
     public ResponseEntity<?> uploadPhoto(
             @PathVariable Long eventId,
-            @RequestParam("file")MultipartFile file,
+            @RequestParam("file") MultipartFile file,
             @RequestParam(value = "caption", required = false) String caption
             ){
         try {
@@ -62,6 +64,31 @@ public class PhotoController {
             //500エラー
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("写真のアップロード中にエラーが発生しました: " + e.getMessage());
+        }
+    }
+    /*
+     2. イベントの写真一覧取得API
+     GET /api/photos/event/{eventId}
+     */
+    @GetMapping("/event/{eventId}")
+    public ResponseEntity<?> getPhotosByEvent(@PathVariable Long eventId){
+        try{
+            Event event = eventService.getEventById(eventId);
+
+            //イベントの写真一覧取得
+            List<Photo> photos = photoService.getPhotosByEvent(event);
+
+            //レスポンス用のDTOを作成
+            List<PhotoResponse> responses = photos.stream()//Photoのリストをstreamに変換
+                    .map(this::convertToPhotoResponse)//mapで各要素に変換処理を適応
+                    .collect(Collectors.toList());//結果をリストとして収集
+
+            return ResponseEntity.ok(responses);
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("イベントの写真一覧を取得できませんでした: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("写真一覧取得中にエラーが発生しました: " + e.getMessage());
         }
     }
 
