@@ -79,9 +79,9 @@ public class PhotoController {
             List<Photo> photos = photoService.getPhotosByEvent(event);
 
             //レスポンス用のDTOを作成
-            List<PhotoResponse> responses = photos.stream()//Photoのリストをstreamに変換
-                    .map(this::convertToPhotoResponse)//mapで各要素に変換処理を適応
-                    .collect(Collectors.toList());//結果をリストとして収集
+            List<PhotoResponse> responses = photos.stream()//List<Photo> → Stream<Photo>
+                    .map(this::convertToPhotoResponse)//Photo → PhotoResponse (一個ずつ)
+                    .collect(Collectors.toList());//Stream<PhotoResponse> → List<PhotoResponse>
 
             return ResponseEntity.ok(responses);
         } catch (RuntimeException e){
@@ -89,6 +89,18 @@ public class PhotoController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("写真一覧取得中にエラーが発生しました: " + e.getMessage());
+        }
+    }
+
+    /*
+     3. 写真ファイル取得API
+     GET /api/photos/file/{filename}
+     */
+    @GetMapping("/file/{filename}")
+    public ResponseEntity<byte[]> getPhotoFile(@PathVariable String filename){
+        try {
+            //ファイルデータの取得
+            byte[] photoData = photoService.getPhotoFile(filename);
         }
     }
 
