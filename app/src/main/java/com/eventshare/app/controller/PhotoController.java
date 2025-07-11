@@ -101,6 +101,15 @@ public class PhotoController {
         try {
             //ファイルデータの取得
             byte[] photoData = photoService.getPhotoFile(filename);
+
+            //Content-Typeを推測
+
+            //ヘッダーを設定
+
+            //キャッシュヘッダーを追加
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
