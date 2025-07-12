@@ -6,7 +6,9 @@ import com.eventshare.app.entity.User;
 import com.eventshare.app.service.EventService;
 import com.eventshare.app.service.PhotoService;
 import com.eventshare.app.service.UserService;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,6 +27,7 @@ public class PhotoController {
     private final PhotoService photoService;
     private final EventService eventService;
     private final UserService userService;
+    private final Tika tika = new Tika();
 
     @Autowired
     public PhotoController(PhotoService photoService, EventService eventService, UserService userService){
@@ -102,11 +106,21 @@ public class PhotoController {
             //ファイルデータの取得
             byte[] photoData = photoService.getPhotoFile(filename);
 
-            //Content-Typeを推測
+            //TikaでContent-Typeを推測
+            String contentType = detectContentType(photoData, filename);
 
-            //ヘッダーを設定
+            //画像かどうかチェック
+            if (!contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest().build();
+            }
 
-            //キャッシュヘッダーを追加
+            //ヘッダー情報を設定
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", contentType);//タイプ設定
+            headers.set("Content-Length", String.valueOf(photoData.length));//サイズ設定
+            headers.setCacheControl("public, max-age=3600");//1時間キャッシュ
+
+            return new ResponseEntity<>(photoData, headers, HttpStatus.OK);
 
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -192,5 +206,31 @@ public class PhotoController {
 
         public String getUsername() { return username; }
         public void setUsername(String username) { this.username = username; }
+    }
+
+    /*
+    Tikaでファイル形式を判定
+     */
+    private String detectContentType(byte[] data, String filename){
+        try {
+            return tika.detect(data, filename);
+        } catch (Exception e) {
+            return fallbackDetection(filename);
+        }
+    }
+
+    /*
+    フォールバック（予備プラン）
+     */
+    private String fallbackDetection(String filename) {
+        if (filename == null) return "application/octet-stream";//よくわからないファイルとして返す
+
+        String lowerCase = filename.toLowerCase();//小文字にする
+        if (lowerCase.endsWith(".jpg") || lowerCase.endsWith(".jpeg")) return "image/jpeg";
+        if (lowerCase.endsWith(".png")) return "image/png";
+        if (lowerCase.endsWith(".gif")) return "image/gif";
+        if (lowerCase.endsWith(".webp")) return "image/webp";
+
+        return "application/octet-stream";
     }
 }
