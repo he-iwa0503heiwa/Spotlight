@@ -41,7 +41,9 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    //リレーションシップの定義
+    /*
+    リレーションシップの定義
+     */
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL)
     private List<Event> createdEvents = new ArrayList<>();
 
