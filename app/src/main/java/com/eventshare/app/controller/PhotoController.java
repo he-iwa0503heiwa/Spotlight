@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/photos")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*")
 public class PhotoController {
     private final PhotoService photoService;
     private final EventService eventService;
