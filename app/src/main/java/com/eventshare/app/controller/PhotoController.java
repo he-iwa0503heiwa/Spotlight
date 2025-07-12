@@ -123,7 +123,30 @@ public class PhotoController {
             return new ResponseEntity<>(photoData, headers, HttpStatus.OK);
 
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();//メッセージなし
+        }
+    }
+
+    /*
+     4. 写真削除API
+     DELETE /api/photos/{photoId}
+     */
+    @DeleteMapping("/{photoId}")
+    public ResponseEntity<?> deletePhoto(@PathVariable Long photoId) {
+        try {
+            //ユーザー取得
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.getUserByUsername(username);
+
+            //写真を削除
+            photoService.deletePhoto(photoId, user);
+
+            return ResponseEntity.ok("写真が削除されました");
+        } catch (RuntimeException e){
+            return ResponseEntity.badRequest().body("写真の削除に失敗しました: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("写真削除中にエラーが発生しました: " + e.getMessage());
         }
     }
 
