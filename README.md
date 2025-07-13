@@ -7,7 +7,7 @@ EventShareは、同じ趣味を持つ人々との交流を目的としたイベ�
 ## 技術スタック
 
 ### バックエンド
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.5.3**
 - **Spring Security** (JWT認証)
 - **Spring Data JPA**
