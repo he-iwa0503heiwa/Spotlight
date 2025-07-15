@@ -1,0 +1,32 @@
+let currentToken = 'dummy-token';//トークン保持
+let currentUser = {id: 1, username: 'testUser'};//ユーザー情報
+let selectedEventId = null;//選択されたID
+let selectedPhotos = [];//選択された写真
+
+//ページ読み込み時に初期化(HTMLが準備完了次第)
+document.addEventListener('DOMContentLoaded', function(){
+    loadEvent();
+    setupEventListeners();
+});
+
+//イベントリスナーの設定
+function setupEventListeners() {
+    const uploadArea = document.getElementById('upload-area');//アップロード（エリア）
+    const fileInput = document.getElementById('file-input');//ファイル選択
+    const uploadForm = document.getElementById('upload-form');//アップロードフォーム
+    const eventSelect = document.getElementById('event-select');//イベント選択
+    const modalClose = document.getElementById('modal-close');//モーダル（写真拡大表示）
+
+    //イベント選択
+    eventSelect.addEventListener('change', function()){
+        selectedEventId = this.value;
+        if (selectedEventId) {
+            document.getElementById('upload-section').style.display = 'block';
+            document.getElementById('photos-section').style.display = 'block';
+            loadPhotos();
+        } else {
+            document.getElementById('upload-section').style.display = 'none';
+            document.getElementById('photos-section').style.display = 'none';
+        }
+    }
+}
