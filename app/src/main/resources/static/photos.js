@@ -29,4 +29,22 @@ function setupEventListeners() {
             document.getElementById('photos-section').style.display = 'none';
         }
     }
+    //ファイルアップロード関連
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileSelect);
+    uploadForm.addEventListener('submit', uploadPhotos);
+
+    //ドラッグ&ドロップ
+    uploadArea.addEventListener('dragover', handleDragOver);
+    uploadArea.addEventListener('dragleave', handleDragLeave);
+    uploadArea.addEventListener('drop', handleDrop);
+
+    //モーダル
+    modalClose.addEventListener('click', closeModal);
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('photo-modal');
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
 }
