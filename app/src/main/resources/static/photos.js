@@ -48,3 +48,22 @@ function setupEventListeners() {
         }
     });
 }
+
+//イベント一覧読み込み
+async function loadEvent(){
+    try{
+        const events = [
+            {id: 1, title: '阪神戦'},
+            {id: 2, title: 'カメラ'},
+        ];
+        const eventSelect = document.getElementById('event-select');
+        events.foreach(event => {
+            const option = document.getElementById('option');
+            option.value = event.id;
+            option.textContent = event.title;
+            eventSelect.appendChild(option);
+        })
+    } catch (error){
+
+    }
+}
