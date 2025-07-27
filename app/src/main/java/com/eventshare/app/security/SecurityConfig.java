@@ -76,8 +76,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll() //api/auth/**は誰でもアクセス可
                         .requestMatchers("/api/public/**").permitAll() //api/public/**は誰でもアクセス可
                         .requestMatchers("/api/categories/**").permitAll() //カテゴリは認証不要
+
+                        //イベント関連
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() //イベント一覧は誰でも閲覧可
                         .requestMatchers(HttpMethod.GET, "/api/events/*").permitAll() //イベント詳細は誰でも閲覧可
+
+                        //写真関連のエンドポイントを追加
+                        .requestMatchers(HttpMethod.GET, "/api/photos/event/*").permitAll()  //イベントの写真一覧は誰でも閲覧可
+                        .requestMatchers(HttpMethod.GET, "/api/photos/file/*").permitAll()   //写真ファイル取得は誰でもアクセス可
+                        .requestMatchers(HttpMethod.POST, "/api/photos/upload/*").authenticated() //写真アップロードは認証必要
+                        .requestMatchers(HttpMethod.DELETE, "/api/photos/*").authenticated()      //写真削除は認証必要
+
                         //認証が必要なエンドポイント
                         .requestMatchers("/api/users/**").authenticated() //ユーザー情報関連
                         .requestMatchers("/api/events/*/participate").authenticated() //イベント参加
