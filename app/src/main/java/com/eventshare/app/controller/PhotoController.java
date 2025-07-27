@@ -40,7 +40,7 @@ public class PhotoController {
     1.写真をアップロード
     POST /api/photos/upload/{eventID}
      */
-    @PostMapping("/upload/{eventID}")
+    @PostMapping("/upload/{eventId}")
     public ResponseEntity<?> uploadPhoto(
             @PathVariable Long eventId,
             @RequestParam("file") MultipartFile file,
