@@ -630,3 +630,17 @@ function logout(){
     clearValidationErrors(); //ログアウト時もエラー表示をクリア
     showStatus('ログアウトしました');
 }
+
+//写真ページに遷移する関数
+function transPhotosPage(eventId, eventTitle) {
+    //現在のログイン状態をセッションストレージに保存
+    if (currentToken) {
+        sessionStorage.setItem('currentToken', currentToken);
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+    sessionStorage.setItem('selectedEventId', eventId);
+    sessionStorage.setItem('selectedEventTitle', eventTitle || '');
+
+    //写真ページに遷移
+    window.location.href = 'photos.html';
+}
