@@ -644,3 +644,49 @@ function transPhotosPage(eventId, eventTitle) {
     //写真ページに遷移
     window.location.href = 'photos.html';
 }
+
+//createEventCard関数を修正（写真ボタンで別ページに遷移）
+function createEventCard(evt){
+    const createdBy = evt.creator ? evt.creator.username : '不明';
+
+    //参加ボタンを作成（ログイン済みの場合のみ）
+    let participationButton = '';
+    if (currentToken) {
+        //既に参加しているか
+        if (evt.isParticipating) {
+            participationButton = `<button class="cancel-btn" onclick="cancelParticipation(${evt.id})">参加キャンセル</button>`;
+        } else {
+            participationButton = `<button class="participate-btn" onclick="participateEvent(${evt.id})">参加する</button>`;
+        }
+    }
+
+    //編集・削除ボタン（作成者のみ表示）
+    let managementButtons = '';
+    if (currentToken && currentUser && evt.creator && evt.creator.id === currentUser.id) {
+        managementButtons = `
+            <div class="management-buttons">
+                <button class="edit-btn" onclick="startEditEvent(${evt.id})">編集</button>
+                <button class="delete-btn" onclick="deleteEvent(${evt.id})">削除</button>
+            </div>
+        `;
+    }
+
+    //写真ページ遷移ボタン
+    const photoButton = `<button class="photo-btn" onclick="goToPhotosPage(${evt.id}, '${evt.title}')">📸 写真を見る</button>`;
+
+    return `
+    <div class="event-card" id="event-card-${evt.id}">
+        <h3>${evt.title}</h3>
+        <p>${evt.description || ''}</p>
+        <p>日時: ${new Date(evt.eventDate).toLocaleString()}</p>
+        <p>場所: ${evt.location || '未設定'}</p>
+        <p>カテゴリ: ${evt.category ? evt.category.name : '未設定'}</p>
+        <p>作成者: ${createdBy}</p>
+        <p>参加者数: ${evt.participantCount || 0}/${evt.capacity || '制限なし'}</p>
+        <div class="button-container">
+            ${participationButton}
+            ${photoButton}
+            ${managementButtons}
+        </div>
+    </div>`;
+}
