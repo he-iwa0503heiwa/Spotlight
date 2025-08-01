@@ -24,6 +24,43 @@
     h1 {
         color: #2c3e50;
         text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .event-title {
+        color: #3498db;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 18px;
+    }
+
+    .nav-buttons {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .nav-btn {
+        background-color: #95a5a6;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 0 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .nav-btn:hover {
+        background-color: #7f8c8d;
+    }
+
+    .back-btn {
+        background-color: #3498db;
+    }
+
+    .back-btn:hover {
+        background-color: #2980b9;
     }
 
     h2 {
@@ -65,7 +102,7 @@
         font-weight: bold;
     }
 
-    input, textarea, select, button {
+    input, textarea, button {
         width: 100%;
         padding: 10px;
         border: 1px solid #ddd;
@@ -136,6 +173,7 @@
         cursor: pointer;
         font-size: 12px;
         margin-top: 10px;
+        width: auto;
     }
 
     .delete-btn:hover {
@@ -215,6 +253,7 @@
     .modal-image {
         width: 100%;
         height: auto;
+        border-radius: 8px;
     }
 
     .close {
@@ -240,32 +279,47 @@
         background-color: #229954;
     }
 
-    .event-selector {
-        margin-bottom: 20px;
+    .login-required {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .login-required a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    .login-required a:hover {
+        text-decoration: underline;
     }
   </style>
 </head>
 <body>
 <h1>EventShare - 写真機能</h1>
+<div class="event-title" id="event-title">イベントの写真</div>
 
-<!-- イベント選択 -->
-<div class="container">
-  <h2>イベント選択</h2>
-  <div class="event-selector">
-    <select id="event-select">
-      <option value="">イベントを選択してください</option>
-    </select>
-  </div>
+<!-- ナビゲーションボタン -->
+<div class="nav-buttons">
+  <a href="index.html" class="nav-btn back-btn">🏠 メインページに戻る</a>
+  <button class="nav-btn" onclick="location.reload()">🔄 更新</button>
+</div>
+
+<!-- ログイン必要メッセージ -->
+<div id="login-required" class="container login-required hidden">
+  <h3>ログインが必要です</h3>
+  <p>写真のアップロードにはログインが必要です。</p>
+  <p><a href="index.html">メインページに戻ってログインしてください</a></p>
 </div>
 
 <!-- 写真アップロード -->
-<div class="container" id="upload-section" style="display: none;">
+<div class="container" id="upload-section">
   <h2>写真アップロード</h2>
 
   <div class="upload-area" id="upload-area">
     <p>写真をドラッグ&ドロップするか、クリックして選択してください</p>
     <p style="font-size: 14px; color: #666;">（JPEG、PNG、GIF、WebP形式、10MB以下）</p>
-    <input type="file" id="file-input" class="file-input" accept="image/*" multiple>
+    <input type="file" id="file-input" class="file-input" accept="image/*">
   </div>
 
   <div class="preview-area" id="preview-area"></div>
@@ -283,7 +337,7 @@
 </div>
 
 <!-- 写真一覧 -->
-<div class="container" id="photos-section" style="display: none;">
+<div class="container" id="photos-section">
   <h2>イベント写真</h2>
   <div class="photo-grid" id="photos-grid"></div>
 </div>
@@ -298,5 +352,7 @@
     <img id="modal-image" class="modal-image">
   </div>
 </div>
+
+<script src="photos.js"></script>
 </body>
 </html>
