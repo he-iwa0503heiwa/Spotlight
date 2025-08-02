@@ -1,34 +1,52 @@
-let currentToken = 'dummy-token';//トークン保持
-let currentUser = {id: 1, username: 'testUser'};//ユーザー情報
-let selectedEventId = null;//選択されたID
-let selectedPhotos = [];//選択された写真
+let currentToken = null;
+let currentUser = null;
+let selectedEventId = null;
+let selectedEventTitle = '';
+let selectedFiles = [];
 
-//ページ読み込み時に初期化(HTMLが準備完了次第)
+//ページ読み込み時に初期化
 document.addEventListener('DOMContentLoaded', function(){
-    loadEvent();
+    initializePage();
     setupEventListeners();
 });
 
+//ページ初期化
+function initializePage() {
+    //セッションストレージからログイン情報を復元
+    currentToken = sessionStorage.getItem('currentToken');
+    const userJson = sessionStorage.getItem('currentUser');
+    if (userJson) {
+        currentUser = JSON.parse(userJson);
+    }
+
+    // イベント情報を復元
+    selectedEventId = sessionStorage.getItem('selectedEventId');
+    selectedEventTitle = sessionStorage.getItem('selectedEventTitle') || 'イベント';
+
+    // イベントタイトルを表示
+    document.getElementById('event-title').textContent = `${selectedEventTitle} の写真`;
+
+    // ログイン状態をチェック
+    if (!currentToken) {
+        document.getElementById('login-required').classList.remove('hidden');
+        document.getElementById('upload-section').style.display = 'none';
+    }
+
+    //写真一覧を読み込み
+    if (selectedEventId) {
+        loadPhotos();
+    } else {
+        showStatus('イベント情報が見つかりません', true);
+    }
+}
+
 //イベントリスナーの設定
 function setupEventListeners() {
-    const uploadArea = document.getElementById('upload-area');//アップロード（エリア）
-    const fileInput = document.getElementById('file-input');//ファイル選択
-    const uploadForm = document.getElementById('upload-form');//アップロードフォーム
-    const eventSelect = document.getElementById('event-select');//イベント選択
-    const modalClose = document.getElementById('modal-close');//モーダル（写真拡大表示）
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadForm = document.getElementById('upload-form');
+    const modalClose = document.getElementById('modal-close');
 
-    //イベント選択
-    eventSelect.addEventListener('change', function()){
-        selectedEventId = this.value;
-        if (selectedEventId) {
-            document.getElementById('upload-section').style.display = 'block';
-            document.getElementById('photos-section').style.display = 'block';
-            loadPhotos();
-        } else {
-            document.getElementById('upload-section').style.display = 'none';
-            document.getElementById('photos-section').style.display = 'none';
-        }
-    }
     //ファイルアップロード関連
     uploadArea.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileSelect);
@@ -47,25 +65,6 @@ function setupEventListeners() {
             closeModal();
         }
     });
-}
-
-//イベント一覧読み込み
-async function loadEvent(){
-    try{
-        const events = [
-            {id: 1, title: '阪神戦'},
-            {id: 2, title: 'カメラ'},
-        ];
-        const eventSelect = document.getElementById('event-select');
-        events.foreach(event => {
-            const option = document.getElementById('option');
-            option.value = event.id;
-            option.textContent = event.title;
-            eventSelect.appendChild(option);
-        })
-    } catch (error){
-        showStatus('イベント一覧の読み込みに失敗しました', true);
-    }
 }
 
 //ファイル選択処理
@@ -136,8 +135,13 @@ function displayPreview() {
 async function uploadPhotos(event) {
     event.preventDefault();
 
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
     if (!selectedEventId) {
-        showStatus('イベントを選択してください', true);
+        showStatus('イベント情報が見つかりません', true);
         return;
     }
 
@@ -163,8 +167,6 @@ async function uploadPhotos(event) {
             const progress = ((i + 1) / selectedFiles.length) * 100;
             progressFill.style.width = progress + '%';
 
-            //実際は以下のAPIを呼び出し
-            /*
             const response = await fetch(`/api/photos/upload/${selectedEventId}`, {
                 method: 'POST',
                 headers: {
@@ -174,12 +176,9 @@ async function uploadPhotos(event) {
             });
 
             if (!response.ok) {
-                throw new Error(`${file.name} のアップロードに失敗しました`);
+                const errorText = await response.text();
+                throw new Error(`${file.name} のアップロードに失敗しました: ${errorText}`);
             }
-            */
-
-            //ダミーの遅延（実際のアップロード時間をシミュレート）
-            await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         showStatus(`${selectedFiles.length}枚の写真をアップロードしました`);
@@ -208,29 +207,14 @@ async function loadPhotos() {
     if (!selectedEventId) return;
 
     try {
-        //ダミーデータ（実際はAPI呼び出し）
-        const photos = [
-            {
-                id: 1,
-                filename: 'photo1.jpg',
-                originalFilename: 'game_action.jpg',
-                caption: 'ホームランの瞬間！',
-                uploadedAt: new Date().toISOString(),
-                uploadedBy: { username: 'baseball_fan' },
-                fileSize: 2048576
-            },
-            {
-                id: 2,
-                filename: 'photo2.jpg',
-                originalFilename: 'stadium_view.jpg',
-                caption: '甲子園球場の美しい夕景',
-                uploadedAt: new Date().toISOString(),
-                uploadedBy: { username: 'photo_lover' },
-                fileSize: 3145728
-            }
-        ];
+        const response = await fetch(`/api/photos/event/${selectedEventId}`);
 
-        displayPhotos(photos);
+        if (response.ok) {
+            const photos = await response.json();
+            displayPhotos(photos);
+        } else {
+            showStatus('写真一覧の読み込みに失敗しました', true);
+        }
 
     } catch (error) {
         showStatus('写真一覧の読み込みに失敗しました', true);
@@ -243,7 +227,7 @@ function displayPhotos(photos) {
     photosGrid.innerHTML = '';
 
     if (photos.length === 0) {
-        photosGrid.innerHTML = '<p>まだ写真がアップロードされていません。</p>';
+        photosGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">まだ写真がアップロードされていません。</p>';
         return;
     }
 
@@ -251,21 +235,27 @@ function displayPhotos(photos) {
         const photoCard = document.createElement('div');
         photoCard.className = 'photo-card';
 
-        //削除ボタンの表示判定（投稿者本人のみ）
-        const deleteButton = photo.uploadedBy.username === currentUser.username
+        //削除ボタンの表示判定（投稿者本人またはイベント作成者のみ）
+        const canDelete = currentToken &&
+                         currentUser &&
+                         photo.uploadedBy &&
+                         photo.uploadedBy.username === currentUser.username;
+
+        const deleteButton = canDelete
             ? `<button class="delete-btn" onclick="deletePhoto(${photo.id})">削除</button>`
             : '';
 
         photoCard.innerHTML = `
-            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD"
+            <img src="/api/photos/file/${photo.filename}"
                  class="photo-image"
-                 alt="${photo.caption}"
-                 onclick="openModal('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD')">
+                 alt="${photo.caption || ''}"
+                 onclick="openModal('/api/photos/file/${photo.filename}')"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuODreODvOODieWksei0peOBl+OBvuOBl+OBnzwvdGV4dD48L3N2Zz4='">
             <div class="photo-info">
                 <div class="photo-caption">${photo.caption || '説明なし'}</div>
-                <div class="photo-meta">投稿者: ${photo.uploadedBy.username}</div>
-                <div class="photo-meta">ファイル名: ${photo.originalFilename}</div>
-                <div class="photo-meta">サイズ: ${formatFileSize(photo.fileSize)}</div>
+                <div class="photo-meta">投稿者: ${photo.uploadedBy ? photo.uploadedBy.username : '不明'}</div>
+                <div class="photo-meta">ファイル名: ${photo.originalFilename || photo.filename}</div>
+                <div class="photo-meta">サイズ: ${formatFileSize(photo.fileSize || 0)}</div>
                 <div class="photo-meta">投稿日: ${formatDate(photo.uploadedAt)}</div>
                 ${deleteButton}
             </div>
@@ -279,9 +269,12 @@ function displayPhotos(photos) {
 async function deletePhoto(photoId) {
     if (!confirm('この写真を削除しますか？')) return;
 
+    if (!currentToken) {
+        showStatus('ログインが必要です', true);
+        return;
+    }
+
     try {
-        //実際は以下のAPIを呼び出し
-        /*
         const response = await fetch(`/api/photos/${photoId}`, {
             method: 'DELETE',
             headers: {
@@ -289,13 +282,13 @@ async function deletePhoto(photoId) {
             }
         });
 
-        if (!response.ok) {
-            throw new Error('写真の削除に失敗しました');
+        if (response.ok) {
+            showStatus('写真を削除しました');
+            loadPhotos(); //写真一覧を再読み込み
+        } else {
+            const errorText = await response.text();
+            showStatus(`削除エラー: ${errorText}`, true);
         }
-        */
-
-        showStatus('写真を削除しました');
-        loadPhotos(); //写真一覧を再読み込み
 
     } catch (error) {
         showStatus(`削除エラー: ${error.message}`, true);
@@ -325,6 +318,7 @@ function formatFileSize(bytes) {
 }
 
 function formatDate(dateString) {
+    if (!dateString) return '不明';
     return new Date(dateString).toLocaleDateString('ja-JP', {
         year: 'numeric',
         month: 'short',
