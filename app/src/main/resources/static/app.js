@@ -632,7 +632,7 @@ function logout(){
 }
 
 //写真ページに遷移する関数
-function transPhotosPage(eventId, eventTitle) {
+function goToPhotosPage(eventId, eventTitle) {
     //現在のログイン状態をセッションストレージに保存
     if (currentToken) {
         sessionStorage.setItem('currentToken', currentToken);
@@ -672,7 +672,7 @@ function createEventCard(evt){
     }
 
     //写真ページ遷移ボタン
-    const photoButton = `<button class="photo-btn" onclick="goToPhotosPage(${evt.id}, '${evt.title}')">📸 写真を見る</button>`;
+    const photoButton = `<button class="photo-btn" onclick="goToPhotosPage(${evt.id}, '${evt.title.replace(/'/g, '\\'')}')">📸 写真を見る</button>`;
 
     return `
     <div class="event-card" id="event-card-${evt.id}">
