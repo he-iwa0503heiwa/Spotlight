@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 /**
  * Spring Securityの「設定だけ」をまとめたクラス
- * 各securityパッケージで設定したSpring Securiryをbean化して他のクラスでも注入できるように設定しているクラス
+ * 各securityパッケージで設定したSpring Securityをbean化して他のクラスでも注入できるように設定しているクラス
  */
 @Configuration
 @EnableWebSecurity
@@ -72,7 +72,11 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) //例外処理（未認証のときの対応）
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //セッションの管理方法を「ステートレス」に
                 .authorizeHttpRequests(auth -> auth //↓アクセス制御
-                        .requestMatchers("/", "/index.html", "/*.js", "/*.css").permitAll()
+                        //静的リソース（HTML、CSS、JS、画像、favicon等）は認証不要
+                        .requestMatchers("/", "/index.html", "/photos.html", "/*.js", "/*.css", "/favicon.ico").permitAll()
+                        .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+
+                        //API認証不要エンドポイント
                         .requestMatchers("/api/auth/**").permitAll() //api/auth/**は誰でもアクセス可
                         .requestMatchers("/api/public/**").permitAll() //api/public/**は誰でもアクセス可
                         .requestMatchers("/api/categories/**").permitAll() //カテゴリは認証不要
