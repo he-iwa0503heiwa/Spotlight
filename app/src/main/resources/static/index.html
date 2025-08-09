@@ -369,10 +369,31 @@
 
 <script src="app.js"></script>
 <script>
+    //DOMが完全に読み込まれてから実行
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('register-form').addEventListener('submit', userRegister);
-        document.getElementById('login-form').addEventListener('submit', userLogin);
-        document.getElementById('create-event-form').addEventListener('submit', createEvent);
+        console.log('DOM loaded, setting up event listeners...');
+
+        //関数が定義されているか確認
+        if (typeof userRegister === 'function') {
+            console.log('userRegister function found');
+            document.getElementById('register-form').addEventListener('submit', userRegister);
+        } else {
+            console.error('userRegister function not found');
+        }
+
+        if (typeof userLogin === 'function') {
+            console.log('userLogin function found');
+            document.getElementById('login-form').addEventListener('submit', userLogin);
+        } else {
+            console.error('userLogin function not found');
+        }
+
+        if (typeof createEvent === 'function') {
+            console.log('createEvent function found');
+            document.getElementById('create-event-form').addEventListener('submit', createEvent);
+        } else {
+            console.error('createEvent function not found');
+        }
     });
 </script>
 </body>
