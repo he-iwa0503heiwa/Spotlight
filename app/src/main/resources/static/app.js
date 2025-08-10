@@ -359,13 +359,24 @@ function showAuthSection(){
 }
 
 function logout(){
+    //グローバル変数をクリア
     currentToken = null;
     currentUser = null;
     editingEventId = null;
+
+    //セッションストレージをクリア
+    sessionStorage.removeItem('currentToken');
+    sessionStorage.removeItem('currentUser');
+    sessionStorage.removeItem('selectedEventId');
+    sessionStorage.removeItem('selectedEventTitle');
+
+    //UI状態をリセット
     showAuthSection();
     document.getElementById('login-form').reset();
     document.getElementById('create-event-form').reset();
     clearValidationErrors();
+
+    console.log('ログアウト完了 - セッション情報をクリアしました');
     showStatus('ログアウトしました');
 }
 
