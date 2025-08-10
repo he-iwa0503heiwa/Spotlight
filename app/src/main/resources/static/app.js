@@ -497,3 +497,91 @@ function displayMyParticipations(participations) {
         </div>
     `).join('');
 }
+
+//app.jsの最後に以下を追加
+
+//ページ読み込み時にセッションを復元する関数
+function restoreSession() {
+    console.log('セッション復元を試行中...');
+
+    //セッションストレージからログイン情報を取得
+    const savedToken = sessionStorage.getItem('currentToken');
+    const savedUserJson = sessionStorage.getItem('currentUser');
+
+    if (savedToken && savedUserJson) {
+        try {
+            //グローバル変数に復元
+            currentToken = savedToken;
+            currentUser = JSON.parse(savedUserJson);
+
+            console.log('セッション復元成功:', currentUser.username);
+
+            //メイン画面に切り替え
+            showMainSection();
+
+            //イベント一覧を読み込み
+            loadEvents();
+
+            //復元成功メッセージ
+            showStatus(`ログイン状態を復元しました。おかえりなさい、${currentUser.username}さん`);
+
+            return true;
+        } catch (error) {
+            console.error('セッション復元エラー:', error);
+            //エラーが発生した場合はセッションストレージをクリア
+            sessionStorage.clear();
+        }
+    } else {
+        console.log('保存されたセッション情報が見つかりません');
+    }
+
+    return false;
+}
+
+//アプリケーション初期化関数
+function initializeApp() {
+    console.log('アプリケーション初期化中...');
+
+    //まずセッション復元を試行
+    const sessionRestored = restoreSession();
+
+    //セッション復元されなかった場合のみ、通常のログイン画面を表示
+    if (!sessionRestored) {
+        console.log('新規セッション - ログイン画面を表示');
+        showAuthSection();
+    }
+
+    //イベントリスナーの設定
+    setupEventListeners();
+}
+
+//イベントリスナーの設定
+function setupEventListeners() {
+    console.log('イベントリスナーを設定中...');
+
+    //フォームのイベントリスナーを設定
+    const registerForm = document.getElementById('register-form');
+    const loginForm = document.getElementById('login-form');
+    const createEventForm = document.getElementById('create-event-form');
+
+    if (registerForm && typeof userRegister === 'function') {
+        registerForm.addEventListener('submit', userRegister);
+        console.log('ユーザー登録フォームのイベントリスナーを設定');
+    }
+
+    if (loginForm && typeof userLogin === 'function') {
+        loginForm.addEventListener('submit', userLogin);
+        console.log('ログインフォームのイベントリスナーを設定');
+    }
+
+    if (createEventForm && typeof createEvent === 'function') {
+        createEventForm.addEventListener('submit', createEvent);
+        console.log('イベント作成フォームのイベントリスナーを設定');
+    }
+}
+
+//DOMContentLoadedイベントリスナー
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM読み込み完了 - アプリケーションを初期化します');
+    initializeApp();
+});
