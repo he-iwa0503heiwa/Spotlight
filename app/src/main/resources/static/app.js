@@ -105,9 +105,18 @@ async function userLogin(evt){
 
         if (response.ok){
             const result = await response.json();
+
+            //グローバル変数に設定
             currentToken = result.token;
             currentUser = result;
 
+            //セッションストレージに確実に保存
+            sessionStorage.setItem('currentToken', currentToken);
+            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            console.log('ログイン成功 - セッション情報を保存:', currentUser.username);
+
+            // UI切り替え
             showMainSection();
             showStatus(`ログイン成功： こんにちは、${result.username}さん`);
             loadEvents();
