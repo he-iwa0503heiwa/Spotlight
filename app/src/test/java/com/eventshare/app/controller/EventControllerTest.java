@@ -14,9 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -46,13 +46,13 @@ public class EventControllerTest {
     //モックツール
     private MockMvc mockMvc;
     //依存するサービスをモックか
-    @MockBean
+    @Mock
     private EventService eventService;
-    @MockBean
+    @Mock
     private EventCategoryService eventCategoryService;
-    @MockBean
+    @Mock
     private UserService userService;
-    @MockBean
+    @Mock
     private EventParticipationService eventParticipationService;
     private User testUser;              //テスト用ユーザー
     private EventCategory testCategory; //テスト用カテゴリ
