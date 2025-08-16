@@ -91,4 +91,26 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("testuser"));
     }
+
+    /*
+    ユーザー登録失敗のテスト（既存ユーザー名）
+     */
+    @Test
+    void testRegisterUser_UsernameAlreadyExists() throws Exception {
+        //準備
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setUsername("exsitinguser");
+        registerRequest.setPassword("password123");
+        registerRequest.setBio("既存ユーザーです");
+
+        //モックで例外をスロー
+        when(authService.registerUser(any(User.class)))
+                .thenThrow(new RuntimeException("このユーザーはすでに存在します"));
+
+        //実行と検証
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isBadRequest());
+    }
 }
