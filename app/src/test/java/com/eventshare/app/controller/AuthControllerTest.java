@@ -79,14 +79,13 @@ public class AuthControllerTest {
         registerRequest.setUsername("newuser");
         registerRequest.setPassword("password123");
         registerRequest.setBio("新規ユーザーです");
-
         //モックの動作定義（@Mockを使用）
         when(authService.registerUser(any(User.class))).thenReturn(testUser);
 
         //実行と検証
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
+                .content(objectMapper.writeValueAsString(registerRequest)))//objectMapperでjavaからjsonに変換
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.username").value("testuser"));
@@ -102,7 +101,6 @@ public class AuthControllerTest {
         registerRequest.setUsername("exsitinguser");
         registerRequest.setPassword("password123");
         registerRequest.setBio("既存ユーザーです");
-
         //モックで例外をスロー
         when(authService.registerUser(any(User.class)))
                 .thenThrow(new RuntimeException("このユーザーはすでに存在します"));
@@ -112,5 +110,54 @@ public class AuthControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    /*
+    ログイン成功のテスト
+     */
+    @Test
+    void testLoginUser_Success() throws Exception{
+        //準備
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("testuser");
+        loginRequest.setPassword("password123");
+        //トークン準備
+        String testToken = "mockyounotekito.text.token";
+        //モックの設定
+        when(authService.authenticateUser("testuser", "password123"))
+                .thenReturn(testToken);
+        when(authService.getUserByUsername("testuser"))
+                .thenReturn(testUser);
+
+        //実行と検証
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value(testToken))
+                .andExpect(jsonPath("$.type").value("Bearer"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.username").value("testuser"));
+    }
+
+    /*
+    ログイン失敗テスト
+     */
+    @Test
+    void testLoginUser_AuthenticationFailure() throws Exception{
+        //準備
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("testuser");
+        loginRequest.setPassword("wrongpassword");
+
+        //モック設定(認証失敗)
+        when(authService.authenticateUser("testuser", "wrongpassword"))
+                .thenThrow(new RuntimeException("認証に失敗しました"));
+
+        //検証
+        mockMvc.perform(post("api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized());
     }
 }
