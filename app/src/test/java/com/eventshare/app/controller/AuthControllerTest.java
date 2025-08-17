@@ -63,7 +63,7 @@ public class AuthControllerTest {
         //テスト用ユーザーデータ作成
         testUser = new User();
         testUser.setId(1L);
-        testUser.setUsername("testUser");
+        testUser.setUsername("testuser");
         testUser.setPassword("password");
         testUser.setBio("テストユーザーです");
         testUser.setCreatedAt(LocalDateTime.now());
@@ -155,7 +155,7 @@ public class AuthControllerTest {
                 .thenThrow(new RuntimeException("認証に失敗しました"));
 
         //検証
-        mockMvc.perform(post("api/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
@@ -172,7 +172,7 @@ public class AuthControllerTest {
         when(authService.validateToken(validToken)).thenReturn(true);
 
         //検証
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/validate")
                 .param("token", validToken))
                 .andExpect(status().isOk());
     }
@@ -188,7 +188,7 @@ public class AuthControllerTest {
         when(authService.validateToken(invalidToken)).thenReturn(false);
 
         //検証
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/validate")
                 .param("token", invalidToken))
                 .andExpect(status().isUnauthorized());
     }
