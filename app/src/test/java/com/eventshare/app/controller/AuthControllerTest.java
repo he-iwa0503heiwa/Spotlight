@@ -160,4 +160,36 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
     }
+
+    /*
+    トークン認証成功テスト
+     */
+    @Test
+    void testValidateToken_Success() throws Exception{
+        //トークン準備
+        String validToken = "validToken.token";
+        //モックの設定
+        when(authService.validateToken(validToken)).thenReturn(true);
+
+        //検証
+        mockMvc.perform(post("/api/auth/login")
+                .param("token", validToken))
+                .andExpect(status().isOk());
+    }
+
+    /*
+    トークン認証失敗テスト
+     */
+    @Test
+    void testValidateToken_Invalid() throws Exception{
+        //トークン準備
+        String invalidToken = "invalidToken.token";
+        //モック設定
+        when(authService.validateToken(invalidToken)).thenReturn(false);
+
+        //検証
+        mockMvc.perform(post("/api/auth/login")
+                .param("token", invalidToken))
+                .andExpect(status().isUnauthorized());
+    }
 }
