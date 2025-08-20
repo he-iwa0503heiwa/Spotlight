@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -39,17 +40,17 @@ public class EventServiceImplTest {
     void setUp() {
         //テスト用ユーザー
         testUser = new User();
-        testUser.setId(1l);
+        testUser.setId(1L);
         testUser.setUsername("testuser");
 
         //テスト用カテゴリ
         testCategory = new EventCategory();
-        testCategory.setId(1l);
+        testCategory.setId(1L);
         testCategory.setName("testcategory");
 
         //テスト用イベント
         testEvent = new Event();
-        testEvent.setId(1l);
+        testEvent.setId(1L);
         testEvent.setTitle("testtitle");
         testEvent.setDescription("testdescription");
         testEvent.setEventDate(LocalDateTime.now().plusDays(7));
@@ -69,7 +70,21 @@ public class EventServiceImplTest {
 
         //検証
         assertEquals(1, result.size());//サイズが１か
-        assertEquals("", result.get(0).getTitle());//タイトル正しいか
+        assertEquals("testtitle", result.get(0).getTitle());//タイトル正しいか
         verify(eventRepository, times(1)).findAll();//findAll()が呼ばれたのは1回か
+    }
+
+    @Test
+    void testGetEventById_Success() {
+        //モックの設定
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(testEvent));
+
+        //テスト実行
+        Event result = eventService.getEventById(1L);
+
+        //検証
+        assertEquals("testtitle", result.getTitle());//タイトル正しいか
+        assertEquals(testUser.getId(), result.getCreator().getId());
+        verify(eventRepository, times(1)).findById(1L);
     }
 }
