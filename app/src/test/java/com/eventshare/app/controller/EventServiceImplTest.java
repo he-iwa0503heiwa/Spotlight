@@ -36,6 +36,7 @@ public class EventServiceImplTest {
     private User testUser;
     private EventCategory testCategory;
 
+    //初期セット
     @BeforeEach
     void setUp() {
         //テスト用ユーザー
@@ -59,6 +60,7 @@ public class EventServiceImplTest {
         testEvent.setCreator(testUser);
     }
 
+    //イベント情報取得テスト
     @Test
     void testGetAllEvents() {
         //モックの設定
@@ -74,6 +76,7 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).findAll();//findAll()が呼ばれたのは1回か
     }
 
+    //IDからイベント取得テスト（成功）
     @Test
     void testGetEventById_Success() {
         //モックの設定
@@ -86,5 +89,20 @@ public class EventServiceImplTest {
         assertEquals("testtitle", result.getTitle());//タイトル正しいか
         assertEquals(testUser.getId(), result.getCreator().getId());
         verify(eventRepository, times(1)).findById(1L);
+    }
+
+    //イベント作成(成功)テスト
+    @Test
+    void testCreateEvent_Success() {
+        //モックの設定
+        when(eventRepository.save(any(Event.class))).thenReturn(testEvent);
+
+        //テスト実行
+        Event result = eventService.createEvent(testEvent);
+
+        //検証
+        assertEquals("testtitle", result.getTitle());
+        assertEquals(50, result.getCapacity());
+        verify(eventRepository,times(1)).save(testEvent);
     }
 }
