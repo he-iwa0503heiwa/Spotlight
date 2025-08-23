@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 /*
@@ -91,6 +92,20 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).findById(1L);
     }
 
+    //IDからイベント取得テスト（失敗）
+    @Test
+    void testGetEventById_NotFound() {
+        //モックの設定
+        when(eventRepository.findById(999L)).thenReturn(Optional.empty());
+
+        //テストの実行(assertThrows(期待するクラス, 例外を投げるはずのクラス))
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> eventService.getEventById(999L));
+
+        assertEquals("イベントが見つかりません。ID: 999", runtimeException.getMessage());//例外メッセージチェック
+        verify(eventRepository, times(1)).findById(999L);
+    }
+
     //イベント作成(成功)テスト
     @Test
     void testCreateEvent_Success() {
@@ -103,6 +118,36 @@ public class EventServiceImplTest {
         //検証
         assertEquals("testtitle", result.getTitle());
         assertEquals(50, result.getCapacity());
-        verify(eventRepository,times(1)).save(testEvent);
+        verify(eventRepository, times(1)).save(testEvent);
+    }
+
+    //イベント作成(失敗)テスト　過去日付
+    @Test
+    void testCreateEvent_PastDate() {
+        //過去日時を設定
+        testEvent.setEventDate(LocalDateTime.now().minusDays(1));
+
+        //テスト実行
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> eventService.createEvent(testEvent));
+
+        //検証
+        assertEquals("イベント開催日時は未来の日時を指定してください", runtimeException.getMessage());
+        verify(eventRepository, never()).save(any(Event.class));//保存処理が呼ばれないことを確認
+    }
+
+    //イベント作成(失敗)テスト　不正な定員
+    @Test
+    void testCreateEvent_IncorrectCapacity() {
+        //不正な定員数作成
+        testEvent.setCapacity(-1);
+
+        //テスト実行
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                () -> eventService.createEvent(testEvent));
+
+        //検証
+        assertEquals("定員は0以上で指定してください", runtimeException.getMessage());
+        verify(eventRepository, never()).save(any(Event.class));//呼ばれないことを確認
     }
 }
