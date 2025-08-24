@@ -150,4 +150,28 @@ public class EventServiceImplTest {
         assertEquals("定員は0以上で指定してください", runtimeException.getMessage());
         verify(eventRepository, never()).save(any(Event.class));//呼ばれないことを確認
     }
+
+    //イベント更新成功テスト
+    @Test
+    void testUpdateEvent_Success() {
+        //更新後のイベント準備
+        Event updatedEvent = new Event();
+        updatedEvent.setTitle("updatedTitle");
+        updatedEvent.setDescription("updatedDescription");
+        updatedEvent.setEventDate(LocalDateTime.now().plusDays(10));
+        updatedEvent.setCapacity(40);
+        updatedEvent.setCategory(testCategory);
+
+        //モックの設定
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(testEvent));//既存のイベント取得
+        when(eventRepository.save(any(Event.class))).thenReturn(testEvent);//更新処理の保存
+
+        //テスト実行
+        Event result = eventService.updateEvent(1L, updatedEvent);
+
+        //検証
+        verify(eventRepository, times(1)).findById(1L);
+        verify(eventRepository, times(1)).save(any(Event.class));
+        assertEquals("updatedTitle", result.getTitle());
+    }
 }
