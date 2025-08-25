@@ -174,4 +174,18 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).save(any(Event.class));
         assertEquals("updatedTitle", result.getTitle());
     }
+
+    //イベント削除成功テスト
+    @Test
+    void testDeleteEvent_Success() {
+        //モックの設定
+        when(eventRepository.findById(1L)).thenReturn(Optional.of(testEvent));//削除対象のイベントが存在するか
+
+        //テスト実行
+        eventService.deleteEvent(1L);
+
+        //検証
+        verify(eventRepository, times(1)).findById(1L);
+        verify(eventRepository, times(1)).delete(testEvent);
+    }
 }
