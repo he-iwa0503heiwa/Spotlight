@@ -201,7 +201,7 @@ public class EventServiceImplTest {
 
         //検証
         assertEquals(1, result.size());
-        assertEquals("testcategory", result.get(0).getTitle());//後ほど修正
-        verify(eventRepository, times(0)).findByCategory(testCategory);
+        assertEquals("testtitle", result.get(0).getTitle());
+        verify(eventRepository, times(1)).findByCategory(testCategory);
     }
 }
