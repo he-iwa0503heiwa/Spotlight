@@ -188,4 +188,20 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).findById(1L);
         verify(eventRepository, times(1)).delete(testEvent);
     }
+
+    //カテゴリ指定でのイベント検索テスト
+    @Test
+    void testGetEventsByCategory() {
+        //モックの設定
+        List<Event> events = Arrays.asList(testEvent);
+        when(eventRepository.findByCategory(testCategory)).thenReturn(events);
+
+        //テスト実行
+        List<Event> result = eventService.getEventsByCategory(testCategory);
+
+        //検証
+        assertEquals(1, result.size());
+        assertEquals("testcategory", result.get(0).getTitle());//後ほど修正
+        verify(eventRepository, times(0)).findByCategory(testCategory);
+    }
 }
