@@ -204,4 +204,19 @@ public class EventServiceImplTest {
         assertEquals("testtitle", result.get(0).getTitle());
         verify(eventRepository, times(1)).findByCategory(testCategory);
     }
+
+    @Test
+    void testGetEventsByCreator() {
+        //モックの設定
+        List<Event> events = Arrays.asList(testEvent);
+        when(eventRepository.findByCreator(testUser)).thenReturn(events);
+
+        //テスト実行
+        List<Event> result = eventService.getEventsByCreator(testUser);
+
+        //検証
+        assertEquals(1, result.size());
+        assertEquals(testUser.getId(), result.get(0).getCreator().getId());
+        verify(eventRepository, times(1)).findByCreator(testUser);
+    }
 }
