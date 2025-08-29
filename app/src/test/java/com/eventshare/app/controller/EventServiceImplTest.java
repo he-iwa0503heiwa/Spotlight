@@ -17,8 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /*
@@ -205,6 +204,7 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).findByCategory(testCategory);
     }
 
+    //作成者指定でのイベント検索テスト
     @Test
     void testGetEventsByCreator() {
         //モックの設定
@@ -218,5 +218,24 @@ public class EventServiceImplTest {
         assertEquals(1, result.size());
         assertEquals(testUser.getId(), result.get(0).getCreator().getId());
         verify(eventRepository, times(1)).findByCreator(testUser);
+    }
+
+    //日付指定でのイベント検索テスト
+    @Test
+    void testGetEventsByDate() {
+        //ターゲット日付設定
+        LocalDateTime targettime = LocalDateTime.now();
+
+        //モックの設定
+        List<Event> events = Arrays.asList(testEvent);
+        when(eventRepository.findByEventDateAfter(targettime)).thenReturn(events);
+
+        //テストの実施
+        List<Event> result = eventService.getEventsByDateAfter(targettime);
+
+        //検証
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getEventDate().isAfter(targettime));
+        verify(eventRepository, times(1)).findByEventDateAfter(targettime);
     }
 }
