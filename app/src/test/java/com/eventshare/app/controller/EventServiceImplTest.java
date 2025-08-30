@@ -242,7 +242,7 @@ public class EventServiceImplTest {
     @Test
     void testGetEventsByKeyword() {
         //キーワード準備
-        String keyword = "keyword";
+        String keyword = "test";
 
         //モックの設定
         List<Event> events = Arrays.asList(testEvent);
