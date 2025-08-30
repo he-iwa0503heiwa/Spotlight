@@ -238,4 +238,22 @@ public class EventServiceImplTest {
         assertTrue(result.get(0).getEventDate().isAfter(targettime));
         verify(eventRepository, times(1)).findByEventDateAfter(targettime);
     }
+
+    @Test
+    void testGetEventsByKeyword() {
+        //キーワード準備
+        String keyword = "keyword";
+
+        //モックの設定
+        List<Event> events = Arrays.asList(testEvent);
+        when(eventRepository.findByTitleContaining(keyword)).thenReturn(events);
+
+        //テスト実行
+        List<Event> result = eventService.getEventsByKeyword(keyword);
+
+        //検証
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getTitle().contains(keyword));
+        verify(eventRepository, times(1)).findByTitleContaining(keyword);
+    }
 }
