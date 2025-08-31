@@ -239,6 +239,7 @@ public class EventServiceImplTest {
         verify(eventRepository, times(1)).findByEventDateAfter(targettime);
     }
 
+    //キーワード検索
     @Test
     void testGetEventsByKeyword() {
         //キーワード準備
@@ -255,5 +256,26 @@ public class EventServiceImplTest {
         assertEquals(1, result.size());
         assertTrue(result.get(0).getTitle().contains(keyword));
         verify(eventRepository, times(1)).findByTitleContaining(keyword);
+    }
+
+    //複合検索
+    @Test
+    void testGetEventsByCategoryAndDateAfter() {
+        //日付設定
+        LocalDateTime targetTime = LocalDateTime.now();
+
+        //モックの設定
+        List<Event> events = Arrays.asList(testEvent);
+        when(eventRepository.findByCategoryAndEventDateAfter(testCategory, targetTime))
+                .thenReturn(events);
+
+        //テスト実行
+        List<Event> result = eventService.getEventsByCategoryAndDateAfter(testCategory, targetTime);
+
+        //検証
+        assertEquals(1, result.size());
+        assertEquals(testCategory.getId(), result.get(0).getCategory().getId());
+        assertTrue(result.get(0).getEventDate().isAfter(targetTime));
+        verify(eventRepository, times(1)).findByCategoryAndEventDateAfter(testCategory, targetTime);
     }
 }
