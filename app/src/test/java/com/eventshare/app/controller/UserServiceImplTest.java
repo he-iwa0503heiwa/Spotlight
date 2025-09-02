@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -57,5 +58,20 @@ public class UserServiceImplTest {
         assertEquals(1, result.size());
         assertEquals("testuser", result.get(0).getUsername());
         verify(userRepository, times(1)).findAll();
+    }
+
+    //ID指定でのユーザー取得テスト
+    @Test
+    void testGetUserById_Success() {
+        //モックの設定
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        //テスト実行
+        User result = userService.getUserById(1L);
+
+        //検証
+        assertEquals("testuser", result.getUsername());
+        assertEquals("testbio", result.getBio());
+        verify(userRepository, times(1)).findById(1L);
     }
 }
