@@ -61,7 +61,7 @@ public class UserServiceImplTest {
         verify(userRepository, times(1)).findAll();
     }
 
-    //ID指定でのユーザー取得テスト
+    //ID指定でのユーザー取得テスト（成功）
     @Test
     void testGetUserById_Success() {
         //モックの設定
@@ -89,5 +89,19 @@ public class UserServiceImplTest {
         //検証
         assertEquals("ユーザーが見つかりません。ID: 999", exception.getMessage());
         verify(userRepository, times(1)).findById(999L);
+    }
+
+    //名前指定でのユーザー取得テスト（成功）
+    @Test
+    void testGetUserByUsername_Success() {
+        //モックの設定
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+
+        //テスト実行
+        User result = userService.getUserByUsername("testuser");
+
+        //検証
+        assertEquals("testuser", result.getUsername());
+        verify(userRepository, times(1)).findByUsername("testuser");
     }
 }
