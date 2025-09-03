@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 /*
@@ -73,5 +74,20 @@ public class UserServiceImplTest {
         assertEquals("testuser", result.getUsername());
         assertEquals("testbio", result.getBio());
         verify(userRepository, times(1)).findById(1L);
+    }
+
+    //ID指定でのユーザー取得失敗テスト(存在しないID)
+    @Test
+    void testGetUserById_NotFound(){
+        //モック設定
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        //テスト実行
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> userService.getUserById(999L));
+
+        //検証
+        assertEquals("ユーザーが見つかりません。ID: 999", exception.getMessage());
+        verify(userRepository, times(1)).findById(999L);
     }
 }
