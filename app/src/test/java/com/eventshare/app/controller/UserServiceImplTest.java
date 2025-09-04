@@ -104,4 +104,19 @@ public class UserServiceImplTest {
         assertEquals("testuser", result.getUsername());
         verify(userRepository, times(1)).findByUsername("testuser");
     }
+
+    //名前指定でのユーザー取得テスト（失敗）
+    @Test
+    void testGetUserByUsername_NotFound() {
+        //モックの設定
+        when(userRepository.findByUsername("nouser")).thenReturn(Optional.empty());
+
+        //テスト実行
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> userService.getUserByUsername("nouser"));
+
+        //検証
+        assertEquals("ユーザーが見つかりません。ユーザー名: nouser", exception.getMessage());
+        verify(userRepository, times(1)).findByUsername("nouser");
+    }
 }
