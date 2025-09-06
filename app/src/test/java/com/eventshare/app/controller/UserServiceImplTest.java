@@ -119,4 +119,26 @@ public class UserServiceImplTest {
         assertEquals("ユーザーが見つかりません。ユーザー名: nouser", exception.getMessage());
         verify(userRepository, times(1)).findByUsername("nouser");
     }
+
+    //ユーザー作成テスト成功
+    @Test
+    void testCreateUser_Success() {
+        //モックの設定
+        when(userRepository.existsByUsername("newuser")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        //新しいユーザー作成
+        User newUser = new User();
+        newUser.setUsername("newuser");
+        newUser.setPassword("newpassword");
+        newUser.setBio("newbio");
+
+        //テスト実行
+        User result = userService.createUser(newUser);
+
+        //検証
+        assertEquals("testuser", result.getUsername());
+        verify(userRepository, times(1)).existsByUsername("newuser");
+        verify(userRepository, times(1)).save(newUser);
+    }
 }
