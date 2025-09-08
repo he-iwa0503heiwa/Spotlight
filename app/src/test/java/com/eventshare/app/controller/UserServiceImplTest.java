@@ -141,4 +141,25 @@ public class UserServiceImplTest {
         verify(userRepository, times(1)).existsByUsername("newuser");
         verify(userRepository, times(1)).save(newUser);
     }
+
+    //ユーザー作成失敗テスト（すでにある名前）
+    @Test
+    void testCreateUser_ExistingName() {
+        //モックの設定
+        when(userRepository.existsByUsername("existinguser")).thenReturn(true);
+
+        User newUser = new User();
+        newUser.setUsername("existinguser");
+        newUser.setPassword("testpassword");
+        newUser.setBio("existingbio");
+
+        //テスト実行
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> userService.getUserByUsername("existinguser"));
+
+        //検証
+        assertEquals("このユーザー名はすでに存在します：　existinguser", exception.getMessage());
+        verify(userRepository, times(1)).existsByUsername("existinguser");
+        verify(userRepository, never()).save(any(User.class));
+    }
 }
